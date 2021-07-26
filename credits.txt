@@ -1,0 +1,26 @@
+Sprites:
+​
+
+    GameFreak | Original sprites from B/W/2 games​
+    Pokecheck.org | Ripping the sprites from B2/W2 roms
+    ​
+    PinkCatDragon | GIF to PNG conversion​
+    Tebited15, WolfPP, Issei Hyoudou, Nasasu, luckygirl88 | B/W styled trainer Red/Leaf sprites​
+    WolfPP | B/W styled trainer Leaf sprite​
+    Spriters-Resource (redblueyellow), Damien, WolfPP | Gen 5 ball sprites
+    ​ 
+
+Sound Effects:
+
+    GameFreak | Original sound effects from B/W/2 games​
+    BadSamaritan | Ripping the sound effects
+    ​ 
+
+Other:
+
+    Luka S.J. | Elite Battle: DX
+    Pokémon Essentials | Base system​
+    Maruno, Marin, Golisopod User | General help, support, and bouncing off ideas
+    PinkCatDragon | GIF to PNG conversion​
+
+Luka S.J. | Scripting Utilities​
