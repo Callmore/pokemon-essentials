@@ -181,7 +181,7 @@ module GameData
         return ret if pbResolveAudioSE(ret)
       end
       ret = sprintf("Cries/%s", species_data.species)
-      return (pbResolveAudioSE(ret)) ? ret : nil
+      return (pbResolveAudioSE(ret)) ? ret : "Cries/DUMMY"
     end
 
     def self.cry_filename(species, form = 0)
@@ -195,7 +195,7 @@ module GameData
     def self.play_cry_from_species(species, form = 0, volume = 90, pitch = 100)
       filename = self.cry_filename(species, form)
       return if !filename
-      pbSEPlay(RPG::AudioFile.new(filename, volume, pitch)) rescue nil
+      pbSEPlay(RPG::AudioFile.new(filename, volume, pitch)) rescue pbSEPlay(RPG::AudioFile.new("Cries/DUMMY", volume, pitch))
     end
 
     def self.play_cry_from_pokemon(pkmn, volume = 90, pitch = nil)
@@ -203,7 +203,7 @@ module GameData
       filename = self.cry_filename_from_pokemon(pkmn)
       return if !filename
       pitch ||= 75 + (pkmn.hp * 25 / pkmn.totalhp)
-      pbSEPlay(RPG::AudioFile.new(filename, volume, pitch)) rescue nil
+      pbSEPlay(RPG::AudioFile.new(filename, volume, pitch)) rescue pbSEPlay(RPG::AudioFile.new("Cries/DUMMY", volume, pitch))
     end
 
     def self.play_cry(pkmn, volume = 90, pitch = nil)
