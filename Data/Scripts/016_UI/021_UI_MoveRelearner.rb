@@ -153,7 +153,7 @@ class MoveRelearnerScreen
   end
 
   def pbGetRelearnableMoves(pkmn)
-    return [] if !pkmn || pkmn.egg? || pkmn.shadowPokemon?
+    return [] if !pkmn || pkmn.egg?
     moves = []
     pkmn.getMoveList.each do |m|
       next if m[0] > pkmn.level || pkmn.hasMove?(m[1])

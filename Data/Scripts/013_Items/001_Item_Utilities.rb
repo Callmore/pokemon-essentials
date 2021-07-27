@@ -393,7 +393,7 @@ end
 def pbEXPAdditionItem(pkmn,exp,item,scene)
   current_lv = pkmn.level
   current_exp = pkmn.exp
-  if pkmn.level >= GameData::GrowthRate.max_level || pkmn.shadowPokemon?
+  if pkmn.level >= GameData::GrowthRate.max_level
     scene.pbDisplay(_INTL("It won't have any effect."))
     return false
   else
@@ -510,10 +510,6 @@ def pbLearnMove(pkmn,move,ignoreifknown=false,bymachine=false,&block)
   move = GameData::Move.get(move).id
   if pkmn.egg? && !$DEBUG
     pbMessage(_INTL("Eggs can't be taught any moves."),&block)
-    return false
-  end
-  if pkmn.shadowPokemon?
-    pbMessage(_INTL("Shadow Pokémon can't be taught any moves."),&block)
     return false
   end
   pkmnname = pkmn.name

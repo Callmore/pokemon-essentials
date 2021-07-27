@@ -341,10 +341,6 @@ ItemHandlers::UseInField.add(:EXPALLOFF,proc { |item|
 # No need to add more code for new ones.
 ItemHandlers::UseOnPokemon.addIf(proc { |item| GameData::Item.get(item).is_evolution_stone? },
   proc { |item,pkmn,scene|
-    if pkmn.shadowPokemon?
-      scene.pbDisplay(_INTL("It won't have any effect."))
-      next false
-    end
     newspecies = pkmn.check_evolution_on_use_item(item)
     if newspecies
       pbFadeOutInWithMusic {
@@ -1172,7 +1168,7 @@ ItemHandlers::UseOnPokemon.add(:SERIOUSMINT,proc { |item,pkmn,scene|
 })
 
 ItemHandlers::UseOnPokemon.add(:MELTANCANDY,proc { |item,pkmn,scene|
-  if !pkmn.isSpecies?(:MELTAN) || pkmn.shadowPokemon?
+  if !pkmn.isSpecies?(:MELTAN)
     scene.pbDisplay(_INTL("It won't have any effect."))
     next false
   end

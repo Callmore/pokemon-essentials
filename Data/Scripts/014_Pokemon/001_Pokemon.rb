@@ -740,7 +740,7 @@ class Pokemon
   end
 
   def can_relearn_move?
-    return false if egg? || shadowPokemon?
+    return false if egg?
     this_level = self.level
     getMoveList.each { |m| return true if m[0] <= this_level && !hasMove?(m[1]) }
     @first_moves.each { |m| return true if !hasMove?(m) }
