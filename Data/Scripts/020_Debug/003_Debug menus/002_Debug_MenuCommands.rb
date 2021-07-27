@@ -160,24 +160,6 @@ DebugMenuCommands.register("daycare", {
   }
 })
 
-DebugMenuCommands.register("relicstone", {
-  "parent"      => "fieldmenu",
-  "name"        => _INTL("Use Relic Stone"),
-  "description" => _INTL("Shadow Pokémon. Choose a Pokémon to show to the Relic Stone for purification."),
-  "effect"      => proc {
-    pbRelicStone
-  }
-})
-
-DebugMenuCommands.register("purifychamber", {
-  "parent"      => "fieldmenu",
-  "name"        => _INTL("Use Purify Chamber"),
-  "description" => _INTL("Shadow Pokémon. Open the Purify Chamber for purification."),
-  "effect"      => proc {
-    pbPurifyChamber
-  }
-})
-
 #===============================================================================
 # Battle options
 #===============================================================================

@@ -79,7 +79,6 @@ class PokeBattle_Pokemon
     ret.hp               = pkmn.hp
     if pkmn.shadow
       ret.shadow         = pkmn.shadow
-      ret.heart_gauge    = pkmn.heartgauge
       ret.hyper_mode     = pkmn.hypermode
       ret.saved_exp      = pkmn.savedexp
       if pkmn.savedev
