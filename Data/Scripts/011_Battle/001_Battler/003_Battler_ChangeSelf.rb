@@ -53,7 +53,11 @@ class PokeBattle_Battler
       return
     end
     return if @fainted   # Has already fainted properly
-    @battle.pbDisplayBrief(_INTL("{1} fainted!",pbThis)) if showMessage
+    if showMessage && @pokemon && @pokemon.isShadow?
+      @battle.pbDisplayBrief(_INTL("{1} dispersed!",pbThis))
+    else
+      @battle.pbDisplayBrief(_INTL("{1} fainted!",pbThis))
+    end
     PBDebug.log("[Pokémon fainted] #{pbThis} (#{@index})") if !showMessage
     @battle.scene.pbFaintBattler(self)
     pbInitEffects(false)

@@ -139,6 +139,9 @@ ItemHandlers::CanUseInBattle.add(:REVIVE,proc { |item,pokemon,battler,move,first
   if pokemon.able? || pokemon.egg?
     scene.pbDisplay(_INTL("It won't have any effect.")) if showMessages
     next false
+  elsif pokemon.isShadow?
+    scene.pbDisplay(_INTL("You cannot revive shadows.")) if showMessages
+    next false
   end
   next true
 })
