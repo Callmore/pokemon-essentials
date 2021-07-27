@@ -70,10 +70,10 @@ class Pokemon
       @shadow_moves[0] = :SHADOWRUSH
     else
       # If moves are not defined then don't give them any and return.
-      return
+      @shadow_moves = nil
     end
     # Record this Pokémon's original moves
-    @moves.each_with_index { |m, i| @shadow_moves[MAX_MOVES + i] = m.id }
+    @moves.each_with_index { |m, i| @shadow_moves[MAX_MOVES + i] = m.id } if @shadow_moves
     # Update moves
     update_shadow_moves
   end
@@ -105,6 +105,7 @@ class Pokemon
         relearned_count += 1
         break if relearned_count >= num_original_moves
       end
+      @shadow_moves = nil
     end
     # Relearn Shadow moves plus some original moves (may not change anything)
     replace_moves(new_moves)
