@@ -56,25 +56,28 @@ class Pokemon
     @saved_exp    = 0
     @saved_ev     = {}
     GameData::Stat.each_main { |s| @saved_ev[s.id] = 0 }
-    @shadow_moves = []
-    # Retrieve Shadow moveset for this Pokémon
-    shadow_moveset = pbLoadShadowMovesets[species_data.id]
-    shadow_moveset = pbLoadShadowMovesets[@species] if !shadow_moveset || shadow_moveset.length == 0
-    # Record this Pokémon's Shadow moves
-    if shadow_moveset && shadow_moveset.length > 0
-      for i in 0...[shadow_moveset.length, MAX_MOVES].min
-        @shadow_moves[i] = shadow_moveset[i]
-      end
-    elsif GameData::Move.exists?(:SHADOWRUSH)
-      # No Shadow moveset defined; just use Shadow Rush
-      @shadow_moves[0] = :SHADOWRUSH
-    else
-      raise _INTL("Expected Shadow moves or Shadow Rush to be defined, but they weren't.")
-    end
-    # Record this Pokémon's original moves
-    @moves.each_with_index { |m, i| @shadow_moves[MAX_MOVES + i] = m.id }
-    # Update moves
-    update_shadow_moves
+    
+    # Removing shadow moves since i dont think we're gonna use them
+    # remind me to uncomment this if we do end up using them
+    # @shadow_moves = []
+    # # Retrieve Shadow moveset for this Pokémon
+    # shadow_moveset = pbLoadShadowMovesets[species_data.id]
+    # shadow_moveset = pbLoadShadowMovesets[@species] if !shadow_moveset || shadow_moveset.length == 0
+    # # Record this Pokémon's Shadow moves
+    # if shadow_moveset && shadow_moveset.length > 0
+    #   for i in 0...[shadow_moveset.length, MAX_MOVES].min
+    #     @shadow_moves[i] = shadow_moveset[i]
+    #   end
+    # elsif GameData::Move.exists?(:SHADOWRUSH)
+    #   # No Shadow moveset defined; just use Shadow Rush
+    #   @shadow_moves[0] = :SHADOWRUSH
+    # else
+    #   raise _INTL("Expected Shadow moves or Shadow Rush to be defined, but they weren't.")
+    # end
+    # # Record this Pokémon's original moves
+    # @moves.each_with_index { |m, i| @shadow_moves[MAX_MOVES + i] = m.id }
+    # # Update moves
+    # update_shadow_moves
   end
 
   def update_shadow_moves(relearn_all_moves = false)
