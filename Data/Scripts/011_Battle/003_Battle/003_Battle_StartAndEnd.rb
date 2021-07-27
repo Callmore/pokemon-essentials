@@ -282,6 +282,7 @@ class PokeBattle_Battle
     when :HeavyRain   then pbDisplay(_INTL("It is raining heavily."))
     when :StrongWinds then pbDisplay(_INTL("The wind is strong."))
     when :ShadowSky   then pbDisplay(_INTL("The sky is shadowy."))
+    when :Fog         then pbDisplay(_INTL("The fog is deep..."))
     end
     # Terrain announcement
     terrain_data = GameData::BattleTerrain.try_get(@field.terrain)
@@ -386,17 +387,6 @@ class PokeBattle_Battle
   end
 
   def pbEndOfBattle
-    # Remove fainted shadow mon
-    # (Yes I took this code of EBDX please don't be mad)
-    for i in 0...$Trainer.party.length
-      k = $Trainer.party.length - 1 - i
-      if $Trainer.party[k].hp <= 0 && $Trainer.party[k].isShadow?
-        $PokemonBag.pbStoreItem($Trainer.party[k].item, 1) if $Trainer.party[k].item
-        $Trainer.party.delete_at(k)
-        $PokemonTemp.evolutionLevels.delete_at(k)
-      end
-    end
-
     oldDecision = @decision
     @decision = 4 if @decision==1 && wildBattle? && @caughtPokemon.length>0
     case oldDecision
@@ -481,8 +471,6 @@ class PokeBattle_Battle
         end
       end
     end
-    
-
     # Clean up battle stuff
     @scene.pbEndBattle(@decision)
     @battlers.each do |b|
