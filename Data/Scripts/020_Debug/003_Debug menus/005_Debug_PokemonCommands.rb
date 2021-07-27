@@ -247,70 +247,106 @@ PokemonDebugMenuCommands.register("setexp", {
 
 PokemonDebugMenuCommands.register("hiddenvalues", {
   "parent"      => "levelstats",
-  "name"        => _INTL("EV/IV/pID..."),
+  "name"        => _INTL("EV/AV/IV/pID..."),
   "always_show" => true,
   "effect"      => proc { |pkmn, pkmnid, heldpoke, settingUpBattle, screen|
     cmd = 0
     loop do
       persid = sprintf("0x%08X", pkmn.personalID)
-      cmd = screen.pbShowCommands(_INTL("Personal ID is {1}.", persid), [
-           _INTL("Set EVs"),
+      cmd = screen.pbShowCommands(_INTL("Personal ID is {1}.\nUsing AVs? {2}", persid, (pkmn.useavs ? "Yes" : "No")), [
+           _INTL("Set " + (pkmn.useavs ? "AVs" : "EVs")),
            _INTL("Set IVs"),
-           _INTL("Randomise pID")], cmd)
+           _INTL("Randomise pID"),
+           _INTL("Toggle AVs / EVs"),], cmd)
       break if cmd < 0
       case cmd
-      when 0   # Set EVs
+      when 0   # Set EVs / AVs
         cmd2 = 0
-        loop do
-          totalev = 0
-          evcommands = []
-          ev_id = []
-          GameData::Stat.each_main do |s|
-            evcommands.push(s.name + " (#{pkmn.ev[s.id]})")
-            ev_id.push(s.id)
-            totalev += pkmn.ev[s.id]
-          end
-          evcommands.push(_INTL("Randomise all"))
-          evcommands.push(_INTL("Max randomise all"))
-          cmd2 = screen.pbShowCommands(_INTL("Change which EV?\nTotal: {1}/{2} ({3}%)",
-                                      totalev, Pokemon::EV_LIMIT,
-                                      100 * totalev / Pokemon::EV_LIMIT), evcommands, cmd2)
-          break if cmd2 < 0
-          if cmd2 < ev_id.length
-            params = ChooseNumberParams.new
-            upperLimit = 0
-            GameData::Stat.each_main { |s| upperLimit += pkmn.ev[s.id] if s.id != ev_id[cmd2] }
-            upperLimit = Pokemon::EV_LIMIT - upperLimit
-            upperLimit = [upperLimit, Pokemon::EV_STAT_LIMIT].min
-            thisValue = [pkmn.ev[ev_id[cmd2]], upperLimit].min
-            params.setRange(0, upperLimit)
-            params.setDefaultValue(thisValue)
-            params.setCancelValue(thisValue)
-            f = pbMessageChooseNumber(_INTL("Set the EV for {1} (max. {2}).",
-               GameData::Stat.get(ev_id[cmd2]).name, upperLimit), params) { screen.pbUpdate }
-            if f != pkmn.ev[ev_id[cmd2]]
-              pkmn.ev[ev_id[cmd2]] = f
+        if pkmn.useavs
+          loop do
+            avcommands = []
+            av_id = []
+            GameData::Stat.each_main do |s|
+              avcommands.push(s.name + " (#{pkmn.av[s.id]})")
+              av_id.push(s.id)
+            end
+            avcommands.push(_INTL("Randomise all"))
+            cmd2 = screen.pbShowCommands(_INTL("Change which AV?"), avcommands, cmd2)
+            break if cmd2 < 0
+            if cmd2 < av_id.length
+              params = ChooseNumberParams.new
+              upperLimit = pkmn.avcaps[av_id[cmd2]]
+              thisValue = [pkmn.av[av_id[cmd2]], upperLimit].min
+              params.setRange(0, upperLimit)
+              params.setDefaultValue(thisValue)
+              params.setCancelValue(thisValue)
+              f = pbMessageChooseNumber(_INTL("Set the AV for {1} (max. {2}).",
+                GameData::Stat.get(av_id[cmd2]).name, upperLimit), params) { screen.pbUpdate }
+              if f != pkmn.av[av_id[cmd2]]
+                pkmn.av[av_id[cmd2]] = f
+                pkmn.calc_stats
+                screen.pbRefreshSingle(pkmnid)
+              end
+            else   # Randomise all
+              GameData::Stat.each_main do |s|
+                pkmn.av[s.id] = rand(pkmn.avcaps[s.id])
+              end
               pkmn.calc_stats
               screen.pbRefreshSingle(pkmnid)
             end
-          else   # (Max) Randomise all
-            evTotalTarget = Pokemon::EV_LIMIT
-            if cmd2 == evcommands.length - 2   # Randomize all (not max)
-              evTotalTarget = rand(Pokemon::EV_LIMIT)
+          end
+        else
+          loop do
+            totalev = 0
+            evcommands = []
+            ev_id = []
+            GameData::Stat.each_main do |s|
+              evcommands.push(s.name + " (#{pkmn.ev[s.id]})")
+              ev_id.push(s.id)
+              totalev += pkmn.ev[s.id]
             end
-            GameData::Stat.each_main { |s| pkmn.ev[s.id] = 0 }
-            while evTotalTarget > 0
-              r = rand(ev_id.length)
-              next if pkmn.ev[ev_id[r]] >= Pokemon::EV_STAT_LIMIT
-              addVal = 1 + rand(Pokemon::EV_STAT_LIMIT / 4)
-              addVal = addVal.clamp(0, evTotalTarget)
-              addVal = addVal.clamp(0, Pokemon::EV_STAT_LIMIT - pkmn.ev[ev_id[r]])
-              next if addVal == 0
-              pkmn.ev[ev_id[r]] += addVal
-              evTotalTarget -= addVal
+            evcommands.push(_INTL("Randomise all"))
+            evcommands.push(_INTL("Max randomise all"))
+            cmd2 = screen.pbShowCommands(_INTL("Change which EV?\nTotal: {1}/{2} ({3}%)",
+                                        totalev, Pokemon::EV_LIMIT,
+                                        100 * totalev / Pokemon::EV_LIMIT), evcommands, cmd2)
+            break if cmd2 < 0
+            if cmd2 < ev_id.length
+              params = ChooseNumberParams.new
+              upperLimit = 0
+              GameData::Stat.each_main { |s| upperLimit += pkmn.ev[s.id] if s.id != ev_id[cmd2] }
+              upperLimit = Pokemon::EV_LIMIT - upperLimit
+              upperLimit = [upperLimit, Pokemon::EV_STAT_LIMIT].min
+              thisValue = [pkmn.ev[ev_id[cmd2]], upperLimit].min
+              params.setRange(0, upperLimit)
+              params.setDefaultValue(thisValue)
+              params.setCancelValue(thisValue)
+              f = pbMessageChooseNumber(_INTL("Set the EV for {1} (max. {2}).",
+                GameData::Stat.get(ev_id[cmd2]).name, upperLimit), params) { screen.pbUpdate }
+              if f != pkmn.ev[ev_id[cmd2]]
+                pkmn.ev[ev_id[cmd2]] = f
+                pkmn.calc_stats
+                screen.pbRefreshSingle(pkmnid)
+              end
+            else   # (Max) Randomise all
+              evTotalTarget = Pokemon::EV_LIMIT
+              if cmd2 == evcommands.length - 2   # Randomize all (not max)
+                evTotalTarget = rand(Pokemon::EV_LIMIT)
+              end
+              GameData::Stat.each_main { |s| pkmn.ev[s.id] = 0 }
+              while evTotalTarget > 0
+                r = rand(ev_id.length)
+                next if pkmn.ev[ev_id[r]] >= Pokemon::EV_STAT_LIMIT
+                addVal = 1 + rand(Pokemon::EV_STAT_LIMIT / 4)
+                addVal = addVal.clamp(0, evTotalTarget)
+                addVal = addVal.clamp(0, Pokemon::EV_STAT_LIMIT - pkmn.ev[ev_id[r]])
+                next if addVal == 0
+                pkmn.ev[ev_id[r]] += addVal
+                evTotalTarget -= addVal
+              end
+              pkmn.calc_stats
+              screen.pbRefreshSingle(pkmnid)
             end
-            pkmn.calc_stats
-            screen.pbRefreshSingle(pkmnid)
           end
         end
       when 1   # Set IVs
@@ -351,6 +387,10 @@ PokemonDebugMenuCommands.register("hiddenvalues", {
         end
       when 2   # Randomise pID
         pkmn.personalID = rand(2 ** 16) | rand(2 ** 16) << 16
+        pkmn.calc_stats
+        screen.pbRefreshSingle(pkmnid)
+      when 3   # Toggle between using AVs and EVs
+        pkmn.useavs = !pkmn.useavs
         pkmn.calc_stats
         screen.pbRefreshSingle(pkmnid)
       end

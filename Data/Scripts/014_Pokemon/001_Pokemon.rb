@@ -80,6 +80,13 @@ class Pokemon
   attr_accessor :fused
   # @return [Integer] this Pokémon's personal ID
   attr_accessor :personalID
+  #projectOriginality
+  # @return [Hash<Integer>] mon AV caps
+  attr_accessor :avcaps
+  # @return [Boolean] mon uses AVs instead of EVs
+  attr_accessor :useavs
+  # @return [Hash<Integer>] this Pokémon's awakening values
+  attr_accessor :av
 
   # Max total IVs
   IV_STAT_LIMIT = 31
@@ -91,6 +98,11 @@ class Pokemon
   MAX_NAME_SIZE = 10
   # Maximum number of moves a Pokémon can know at once
   MAX_MOVES     = 4
+  #projectOriginality
+  # starting max AVs for a stat
+  AV_LIMIT      = 25
+  # max AVs a single stat can have
+  AV_LIMIT_MAX  = 75
 
   def self.play_cry(species, form = 0, volume = 90, pitch = 100)
     GameData::Species.play_cry_from_species(species, form, volume, pitch)
@@ -989,21 +1001,25 @@ class Pokemon
   end
 
   # @return [Integer] the maximum HP of this Pokémon
-  def calcHP(base, level, iv, ev)
+  def calcHP(base, level, iv, eav, use_avs)
     return 1 if base == 1   # For Shedinja
-    return ((base * 2 + iv + (ev / 4)) * level / 100).floor + level + 10
+    return ((base * 2 + iv) * level / 100).floor + level + 10 + eav if use_avs
+    return ((base * 2 + iv + (eav / 4)) * level / 100).floor + level + 10
   end
 
   # @return [Integer] the specified stat of this Pokémon (not used for total HP)
-  def calcStat(base, level, iv, ev, nat)
-    return ((((base * 2 + iv + (ev / 4)) * level / 100).floor + 5) * nat / 100).floor
+  def calcStat(base, level, iv, eav, nat, happiness, use_avs)
+    return (((((base * 2 + iv) * level / 100).floor + 5) * (nat / 100) * happiness / 255).floor + eav) if use_avs
+    return ((((base * 2 + iv + (eav / 4)) * level / 100).floor + 5) * nat / 100).floor
   end
 
   # Recalculates this Pokémon's stats.
   def calc_stats
-    base_stats = self.baseStats
-    this_level = self.level
-    this_IV    = self.calcIV
+    base_stats       = self.baseStats
+    this_level       = self.level
+    this_IV          = self.calcIV
+    this_happiness   = self.happiness
+    use_avs          = self.useavs
     # Format stat multipliers due to nature
     nature_mod = {}
     GameData::Stat.each_main { |s| nature_mod[s.id] = 100 }
@@ -1015,9 +1031,17 @@ class Pokemon
     stats = {}
     GameData::Stat.each_main do |s|
       if s.id == :HP
-        stats[s.id] = calcHP(base_stats[s.id], this_level, this_IV[s.id], @ev[s.id])
+        if use_avs
+          stats[s.id] = calcHP(base_stats[s.id], this_level, this_IV[s.id], @av[s.id], use_avs) 
+        else
+          stats[s.id] = calcHP(base_stats[s.id], this_level, this_IV[s.id], @ev[s.id], use_avs)
+        end
       else
-        stats[s.id] = calcStat(base_stats[s.id], this_level, this_IV[s.id], @ev[s.id], nature_mod[s.id])
+        if use_avs
+          stats[s.id] = calcStat(base_stats[s.id], this_level, this_IV[s.id], @av[s.id], nature_mod[s.id], this_happiness, use_avs)
+        else
+          stats[s.id] = calcStat(base_stats[s.id], this_level, this_IV[s.id], @ev[s.id], nature_mod[s.id], this_happiness, use_avs)
+        end
       end
     end
     hpDiff = @totalhp - @hp
@@ -1041,10 +1065,12 @@ class Pokemon
     ret.iv          = {}
     ret.ivMaxed     = {}
     ret.ev          = {}
+    ret.av          = {}
     GameData::Stat.each_main do |s|
       ret.iv[s.id]      = @iv[s.id]
       ret.ivMaxed[s.id] = @ivMaxed[s.id]
       ret.ev[s.id]      = @ev[s.id]
+      ret.av[s.id]      = @av[s.id]
     end
     ret.moves       = []
     @moves.each_with_index { |m, i| ret.moves[i] = m.clone }
@@ -1060,7 +1086,7 @@ class Pokemon
   # @param owner [Owner, Player, NPCTrainer] Pokémon owner (the player by default)
   # @param withMoves [TrueClass, FalseClass] whether the Pokémon should have moves
   # @param rechech_form [TrueClass, FalseClass] whether to auto-check the form
-  def initialize(species, level, owner = $Trainer, withMoves = true, recheck_form = true)
+  def initialize(species, level, owner = $Trainer, withMoves = true, recheck_form = true, using_avs = true)
     species_data = GameData::Species.get(species)
     @species          = species_data.species
     @form             = species_data.form
@@ -1095,9 +1121,14 @@ class Pokemon
     @iv               = {}
     @ivMaxed          = {}
     @ev               = {}
+    @avcaps           = {}
+    @useavs           = using_avs
+    @av               = {}
     GameData::Stat.each_main do |s|
       @iv[s.id]       = rand(IV_STAT_LIMIT + 1)
       @ev[s.id]       = 0
+      @av[s.id]       = 0
+      @avcaps[s.id]   = AV_LIMIT
     end
     if owner.is_a?(Owner)
       @owner = owner

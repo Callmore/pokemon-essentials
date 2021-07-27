@@ -150,6 +150,20 @@ def pbChangeLevel(pkmn,newlevel,scene)
     spdefdiff   = pkmn.spdef
     totalhpdiff = pkmn.totalhp
     pkmn.level = newlevel
+    # choose a random stat to give an AV point to
+    if pkmn.useavs
+      avGainPossible = []
+      rewardIdx = 0
+      GameData::Stat.each_main do |s|
+        if pkmn.av[s.id] < pkmn.avcaps[s.id]
+          avGainPossible.push(s.id)
+        end
+      end
+      if avGainPossible.length > 0
+        rewardIdx = rand(avGainPossible.length)
+        pkmn.av[avGainPossible[rewardIdx]] += 1
+      end
+    end
     pkmn.changeHappiness("vitamin")
     pkmn.calc_stats
     scene.pbRefresh

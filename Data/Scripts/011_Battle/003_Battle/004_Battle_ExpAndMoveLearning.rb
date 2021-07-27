@@ -58,33 +58,35 @@ class PokeBattle_Battle
 
   def pbGainEVsOne(idxParty,defeatedBattler)
     pkmn = pbParty(0)[idxParty]   # The Pokémon gaining EVs from defeatedBattler
-    evYield = defeatedBattler.pokemon.evYield
-    # Num of effort points pkmn already has
-    evTotal = 0
-    GameData::Stat.each_main { |s| evTotal += pkmn.ev[s.id] }
-    # Modify EV yield based on pkmn's held item
-    if !BattleHandlers.triggerEVGainModifierItem(pkmn.item,pkmn,evYield)
-      BattleHandlers.triggerEVGainModifierItem(@initialItems[0][idxParty],pkmn,evYield)
-    end
-    # Double EV gain because of Pokérus
-    if pkmn.pokerusStage>=1   # Infected or cured
-      evYield.each_key { |stat| evYield[stat] *= 2 }
-    end
-    # Gain EVs for each stat in turn
-    if pkmn.shadowPokemon? && pkmn.saved_ev
-      pkmn.saved_ev.each_value { |e| evTotal += e }
-      GameData::Stat.each_main do |s|
-        evGain = evYield[s.id].clamp(0, Pokemon::EV_STAT_LIMIT - pkmn.ev[s.id] - pkmn.saved_ev[s.id])
-        evGain = evGain.clamp(0, Pokemon::EV_LIMIT - evTotal)
-        pkmn.saved_ev[s.id] += evGain
-        evTotal += evGain
+    unless pkmn.useavs
+      evYield = defeatedBattler.pokemon.evYield
+      # Num of effort points pkmn already has
+      evTotal = 0
+      GameData::Stat.each_main { |s| evTotal += pkmn.ev[s.id] }
+      # Modify EV yield based on pkmn's held item
+      if !BattleHandlers.triggerEVGainModifierItem(pkmn.item,pkmn,evYield)
+        BattleHandlers.triggerEVGainModifierItem(@initialItems[0][idxParty],pkmn,evYield)
       end
-    else
-      GameData::Stat.each_main do |s|
-        evGain = evYield[s.id].clamp(0, Pokemon::EV_STAT_LIMIT - pkmn.ev[s.id])
-        evGain = evGain.clamp(0, Pokemon::EV_LIMIT - evTotal)
-        pkmn.ev[s.id] += evGain
-        evTotal += evGain
+      # Double EV gain because of Pokérus
+      if pkmn.pokerusStage>=1   # Infected or cured
+        evYield.each_key { |stat| evYield[stat] *= 2 }
+      end
+      # Gain EVs for each stat in turn
+      if pkmn.shadowPokemon? && pkmn.saved_ev
+        pkmn.saved_ev.each_value { |e| evTotal += e }
+        GameData::Stat.each_main do |s|
+          evGain = evYield[s.id].clamp(0, Pokemon::EV_STAT_LIMIT - pkmn.ev[s.id] - pkmn.saved_ev[s.id])
+          evGain = evGain.clamp(0, Pokemon::EV_LIMIT - evTotal)
+          pkmn.saved_ev[s.id] += evGain
+          evTotal += evGain
+        end
+      else
+        GameData::Stat.each_main do |s|
+          evGain = evYield[s.id].clamp(0, Pokemon::EV_STAT_LIMIT - pkmn.ev[s.id])
+          evGain = evGain.clamp(0, Pokemon::EV_LIMIT - evTotal)
+          pkmn.ev[s.id] += evGain
+          evTotal += evGain
+        end
       end
     end
   end
@@ -195,6 +197,20 @@ class PokeBattle_Battle
       end
       # Levelled up
       pbCommonAnimation("LevelUp",battler) if battler
+      # choose a random stat to give an AV point to
+      if pkmn.useavs
+        avGainPossible = []
+        rewardIdx = 0
+        GameData::Stat.each_main do |s|
+          if pkmn.av[s.id] < pkmn.avcaps[s.id]
+            avGainPossible.push(s.id)
+          end
+        end
+        if avGainPossible.length > 0
+          rewardIdx = rand(avGainPossible.length)
+          pkmn.av[avGainPossible[rewardIdx]] += 1
+        end
+      end
       oldTotalHP = pkmn.totalhp
       oldAttack  = pkmn.attack
       oldDefense = pkmn.defense
