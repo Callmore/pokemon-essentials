@@ -43,6 +43,8 @@ class Pokemon
     base_stats = basestat.is_a?(Array) ? basestat.clone : self.baseStats
     this_level = self.level
     this_IV    = self.calcIV
+    this_happiness   = self.happiness
+    use_avs          = self.useavs
     # Format stat multipliers due to nature
     nature_mod = {}
     GameData::Stat.each_main { |s| nature_mod[s.id] = 100 }
@@ -54,9 +56,17 @@ class Pokemon
     stats = {}; i = 0
     GameData::Stat.each_main do |s|
       if s.id == :HP
-        stats[s.id] = (calcHP(base_stats[s.id], this_level, this_IV[s.id], @ev[s.id]) * (boss ? boss[s.id] : 1)).round
+        if use_avs
+          stats[s.id] = (calcHP(base_stats[s.id], this_level, this_IV[s.id], @av[s.id], use_avs) * (boss ? boss[s.id] : 1)).round
+        else
+          stats[s.id] = (calcHP(base_stats[s.id], this_level, this_IV[s.id], @ev[s.id], use_avs) * (boss ? boss[s.id] : 1)).round
+        end
       else
-        stats[s.id] = (calcStat(base_stats[s.id], this_level, this_IV[s.id], @ev[s.id], nature_mod[s.id]) * (boss ? boss[s.id] : 1)).round
+        if use_avs
+          stats[s.id] = (calcStat(base_stats[s.id], this_level, this_IV[s.id], @av[s.id], nature_mod[s.id], this_happiness, use_avs) * (boss ? boss[s.id] : 1)).round
+        else
+          stats[s.id] = (calcStat(base_stats[s.id], this_level, this_IV[s.id], @ev[s.id], nature_mod[s.id], this_happiness, use_avs) * (boss ? boss[s.id] : 1)).round
+        end
       end
     end
     hpDiff = @totalhp - @hp
