@@ -109,9 +109,6 @@ class PokemonEncounters
     # Check if enc_type has a defined step chance/encounter table
     return false if !@step_chances[enc_type] || @step_chances[enc_type] == 0
     return false if !has_encounter_type?(enc_type)
-    # Poké Radar encounters always happen, ignoring the minimum step period and
-    # trigger probabilities
-    return true if pbPokeRadarOnShakingGrass
     # Get base encounter chance and minimum steps grace period
     encounter_chance = @step_chances[enc_type].to_f
     min_steps_needed = (8 - encounter_chance / 10).clamp(0, 8).to_f
@@ -179,9 +176,8 @@ class PokemonEncounters
   # taking into account Repels and ability effects.
   def allow_encounter?(enc_data, repel_active = false)
     return false if !enc_data
-    return true if pbPokeRadarOnShakingGrass
     # Repel
-    if repel_active
+    if repel_active && !pbPokeRadarOnShakingGrass
       first_pkmn = (Settings::REPEL_COUNTS_FAINTED_POKEMON) ? $Trainer.first_pokemon : $Trainer.first_able_pokemon
       if first_pkmn && enc_data[1] < first_pkmn.level
         @chance_accumulator = 0
@@ -272,13 +268,21 @@ class PokemonEncounters
     # If they activate, they remove all Pokémon from the encounter table that do
     # not have the type they favor. If none have that type, nothing is changed.
     first_pkmn = $Trainer.first_pokemon
-    if first_pkmn
+    if first_pkmn && rand(100) < 50
       favored_type = nil
       case first_pkmn.ability_id
       when :STATIC
-        favored_type = :ELECTRIC if GameData::Type.exists?(:ELECTRIC) && rand(100) < 50
+        favored_type = :ELECTRIC if GameData::Type.exists?(:ELECTRIC)
       when :MAGNETPULL
-        favored_type = :STEEL if GameData::Type.exists?(:STEEL) && rand(100) < 50
+        favored_type = :STEEL if GameData::Type.exists?(:STEEL)
+      when :FLASHFIRE
+        favored_type = :FIRE if GameData::Type.exists?(:FIRE)
+      when :HARVEST
+        favored_type = :GRASS if GameData::Type.exists?(:GRASS)
+      when :LIGHTNINGROD
+        favored_type = :ELECTRIC if GameData::Type.exists?(:ELECTRIC)
+      when :STORMDRAIN
+        favored_type = :WATER if GameData::Type.exists?(:WATER)
       end
       if favored_type
         new_enc_list = []
@@ -379,6 +383,7 @@ def pbGenerateWildPokemon(species,level,isRoamer=false)
   first_pkmn = $Trainer.first_pokemon
   chances = [50,5,1]
   chances = [60,20,5] if first_pkmn && first_pkmn.hasAbility?(:COMPOUNDEYES)
+  chances = [50,50,50] if first_pkmn && first_pkmn.hasAbility?(:SUPERLUCK)
   itemrnd = rand(100)
   if (items[0]==items[1] && items[1]==items[2]) || itemrnd<chances[0]
     genwildpoke.item = items[0]
@@ -391,8 +396,24 @@ def pbGenerateWildPokemon(species,level,isRoamer=false)
   if GameData::Item.exists?(:SHINYCHARM) && $PokemonBag.pbHasItem?(:SHINYCHARM)
     2.times do   # 3 times as likely
       break if genwildpoke.shiny?
+      genwildpoke.shiny = nil
       genwildpoke.personalID = rand(2**16) | rand(2**16) << 16
     end
+  end
+  # Number Battled shiny method
+  shinyTier = $Trainer.pokedex.number_battled_shiny_tier(genwildpoke.species)
+  if Settings::NUMBER_BATTLED_BOOSTS_SHINY_ODDS && shinyTier[1] > 1 && rand(1000) < shinyTier[1]
+    shinyTier[0].times do   # 2-6 times as likely
+      break if genwildpoke.shiny?
+      genwildpoke.shiny = nil
+      genwildpoke.personalID = rand(2 ** 16) | rand(2 ** 16) << 16
+    end
+  end
+  # Brilliant Pokemon
+  brilliantBoost = $Trainer.pokedex.number_battled_brilliant_tier(genwildpoke.species)
+  if rand(65536) < (Settings::BRILLIANT_POKEMON_CHANCE * brilliantBoost).ceil ||
+     (Settings::BRILLIANT_POKEMON_SWITCH > 0 && $game_switches[Settings::BRILLIANT_POKEMON_SWITCH])
+     genwildpoke.generateBrilliant
   end
   # Give Pokérus
   genwildpoke.givePokerus if rand(65536) < Settings::POKERUS_CHANCE
@@ -406,7 +427,7 @@ def pbGenerateWildPokemon(species,level,isRoamer=false)
         (rand(3)<2) ? genwildpoke.makeMale : genwildpoke.makeFemale
       end
     elsif first_pkmn.hasAbility?(:SYNCHRONIZE)
-      genwildpoke.nature = first_pkmn.nature if !isRoamer && rand(100)<50
+      genwildpoke.nature = first_pkmn.nature if !isRoamer && (rand(100)<50 || Settings::MECHANICS_GENERATION >= 8)
     end
   end
   # Trigger events that may alter the generated Pokémon further

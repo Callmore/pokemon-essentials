@@ -30,6 +30,7 @@ module GameData
       "AV"           => [:av,            "uUUUUU"],
       "Happiness"    => [:happiness,     "u"],
       "Shiny"        => [:shininess,     "b"],
+      "SquareShiny"  => [:square_shiny,  "b"],
       "Shadow"       => [:shadowness,    "b"],
       "Ball"         => [:poke_ball,     "s"],
     }
@@ -134,6 +135,7 @@ module GameData
         pkmn.ability = pkmn_data[:ability]
         pkmn.gender = pkmn_data[:gender] || ((trainer.male?) ? 0 : 1)
         pkmn.shiny = (pkmn_data[:shininess]) ? true : false
+        pkmn.square_shiny = (pkmn_data[:square_shiny]) ? true : false
         if pkmn_data[:nature]
           pkmn.nature = pkmn_data[:nature]
         else
