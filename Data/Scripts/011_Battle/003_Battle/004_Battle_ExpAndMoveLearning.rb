@@ -71,15 +71,7 @@ class PokeBattle_Battle
       evYield.each_key { |stat| evYield[stat] *= 2 }
     end
     # Gain EVs for each stat in turn
-    if pkmn.shadowPokemon? && pkmn.saved_ev
-      pkmn.saved_ev.each_value { |e| evTotal += e }
-      GameData::Stat.each_main do |s|
-        evGain = evYield[s.id].clamp(0, Pokemon::EV_STAT_LIMIT - pkmn.ev[s.id] - pkmn.saved_ev[s.id])
-        evGain = evGain.clamp(0, Pokemon::EV_LIMIT - evTotal)
-        pkmn.saved_ev[s.id] += evGain
-        evTotal += evGain
-      end
-    else
+    if pkmn.shadowPokemon?  # Only shadows can gain EVs
       GameData::Stat.each_main do |s|
         evGain = evYield[s.id].clamp(0, Pokemon::EV_STAT_LIMIT - pkmn.ev[s.id])
         evGain = evGain.clamp(0, Pokemon::EV_LIMIT - evTotal)
@@ -171,11 +163,6 @@ class PokeBattle_Battle
       raise RuntimeError.new(
          _INTL("{1}'s new level is less than its\r\ncurrent level, which shouldn't happen.\r\n[Debug: {2}]",
          pkmn.name,debugInfo))
-    end
-    # Give Exp
-    if pkmn.shadowPokemon?
-      pkmn.exp += expGained
-      return
     end
     tempExp1 = pkmn.exp
     battler = pbFindBattler(idxParty)

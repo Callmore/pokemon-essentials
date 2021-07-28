@@ -43,7 +43,6 @@ class PokeBattle_Battle
     if battler.shadowPokemon?
       if battler.inHyperMode?
         battler.pokemon.hyper_mode = false
-        battler.pokemon.adjustHeart(-300)
         pbDisplay(_INTL("{1} came to its senses from the Trainer's call!",battler.pbThis))
       else
         pbDisplay(_INTL("But nothing happened!"))
