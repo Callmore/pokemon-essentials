@@ -4,19 +4,9 @@
 class Pokemon
   attr_accessor :shadow
   attr_writer   :hyper_mode
-  attr_accessor :saved_exp
   attr_accessor :saved_ev
   attr_accessor :shadow_moves
   HEART_GAUGE_SIZE = 3840
-
-  alias :__shadow_expeq :exp=
-  def exp=(value)
-    if shadowPokemon?
-      @saved_exp += value - @exp
-    else
-      __shadow_expeq(value)
-    end
-  end
 
   alias :__shadow_hpeq :hp=
   def hp=(value)
@@ -36,7 +26,6 @@ class Pokemon
   def makeShadow
     @shadow       = true
     @hyper_mode   = false
-    @saved_exp    = 0
     @saved_ev     = {}
     GameData::Stat.each_main { |s| @saved_ev[s.id] = 0 }
     @shadow_moves = []
