@@ -58,7 +58,7 @@ class PokeBattle_Battle
 
   def pbGainEVsOne(idxParty,defeatedBattler)
     pkmn = pbParty(0)[idxParty]   # The Pokémon gaining EVs from defeatedBattler
-    unless pkmn.useavs
+    #unless pkmn.useavs
       evYield = defeatedBattler.pokemon.evYield
       # Num of effort points pkmn already has
       evTotal = 0
@@ -88,7 +88,7 @@ class PokeBattle_Battle
           evTotal += evGain
         end
       end
-    end
+    #end
   end
 
   def pbGainExpOne(idxParty,defeatedBattler,numPartic,expShare,expAll,showMessages=true)
@@ -200,7 +200,7 @@ class PokeBattle_Battle
       # Levelled up
       pbCommonAnimation("LevelUp",battler) if battler
       # choose a random stat to give an AV point to
-      if pkmn.useavs
+      #if pkmn.useavs
         avGainPossible = []
         rewardIdx = 0
         GameData::Stat.each_main do |s|
@@ -212,7 +212,7 @@ class PokeBattle_Battle
           rewardIdx = rand(avGainPossible.length)
           pkmn.av[avGainPossible[rewardIdx]] += 1
         end
-      end
+      #end
       oldTotalHP = pkmn.totalhp
       oldAttack  = pkmn.attack
       oldDefense = pkmn.defense

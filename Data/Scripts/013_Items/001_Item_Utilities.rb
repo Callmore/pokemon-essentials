@@ -152,7 +152,7 @@ def pbChangeLevel(pkmn,newlevel,scene,checkmoves = false)
     totalhpdiff = pkmn.totalhp
     pkmn.level = newlevel
     # choose a random stat to give an AV point to
-    if pkmn.useavs
+    for x in oldlevel..(newlevel-1) do
       avGainPossible = []
       rewardIdx = 0
       GameData::Stat.each_main do |s|
@@ -363,6 +363,165 @@ def pbRaiseHappinessAndLowerEV(pkmn,scene,stat,messages)
   end
   scene.pbRefresh
   scene.pbDisplay(messages[2-(h ? 0 : 2)-(e ? 0 : 1)])
+  return true
+end
+
+#===============================================================================
+# Change AVs (candies)
+#===============================================================================
+def pbJustRaiseAwakeningValues(pkmn, stat, avGain, size = 0)
+  #hell
+  avCandyLimit = Pokemon::AV_LIMIT
+  case size
+    when 0
+      if pkmn.level >= Pokemon::AV_CANDY_LV
+        avCandyLimit = Pokemon::AV_CANDY_MAX
+      else
+        return 0
+      end
+    when 1
+      if pkmn.level >= Pokemon::AV_CANDY_L_LV
+        avCandyLimit = Pokemon::AV_CANDY_L_MAX
+      else
+        return 0
+      end
+    when 2
+      if pkmn.level >= Pokemon::AV_CANDY_XL_LV
+        avCandyLimit = Pokemon::AV_CANDY_XL_MAX
+      else
+        return 0
+      end
+  end
+  
+  stat = GameData::Stat.get(stat).id
+  maximum = [pkmn.avcaps[stat], avCandyLimit].min
+  avGain = avGain.clamp(0, maximum - pkmn.av[stat])
+  if avGain > 0
+    pkmn.av[stat] += avGain
+    pkmn.calc_stats
+  end
+  return avGain
+end
+
+def pbItemRaiseAV(pkmn, stat, scene, size = 0, item = nil, happiness = "")
+  if pkmn.av[stat] >= pkmn.avcaps[stat]
+    scene.pbDisplay(_INTL("It won't have any effect."))
+    return false
+  end
+  qty = 1
+  inc = 1 # always raise AVs by one
+  #hell
+  avCandyLimit = Pokemon::AV_LIMIT
+  case size
+    when 0
+      if pkmn.level >= Pokemon::AV_CANDY_LV
+        avCandyLimit = Pokemon::AV_CANDY_MAX
+      else
+        return 0
+      end
+    when 1
+      if pkmn.level >= Pokemon::AV_CANDY_L_LV
+        avCandyLimit = Pokemon::AV_CANDY_L_MAX
+      else
+        return 0
+      end
+    when 2
+      if pkmn.level >= Pokemon::AV_CANDY_XL_LV
+        avCandyLimit = Pokemon::AV_CANDY_XL_MAX
+      else
+        return 0
+      end
+  end
+  if item
+    maxinc = [pkmn.avcaps[stat], avCandyLimit].min
+    maxUsage = maxinc - pkmn.av[stat]
+    maximum = [maxUsage,$PokemonBag.pbQuantity(item)].min
+    qty = scene.pbChooseNumber(
+      _INTL("How many {1} do you want to use?", GameData::Item.get(item).name_plural), maximum, 1)
+    return false if qty == 0
+    $PokemonBag.pbDeleteItem(item, qty - 1)
+  end
+  if pbJustRaiseAwakeningValues(pkmn, stat, qty, size) == 0
+    scene.pbDisplay(_INTL("It won't have any effect."))
+    return false
+  end
+  scene.pbRefresh
+  statName = GameData::Stat.get(stat).id
+  scene.pbDisplay(_INTL("{1}'s {2} increased.",pkmn.name,statName))
+  qty.times do; pkmn.changeHappiness(happiness); end
+  return true
+end
+
+#===============================================================================
+# Change AV caps (creams)
+#===============================================================================
+def pbJustRaiseAwakeningValueCaps(pkmn, stat, avcapsGain)
+  stat = GameData::Stat.get(stat).id
+  avcapsGain = avcapsGain.clamp(0, Pokemon::AV_LIMIT_MAX - pkmn.avcaps[stat])
+  if avcapsGain > 0
+    pkmn.avcaps[stat] += avcapsGain
+    pkmn.calc_stats
+  end
+  return avcapsGain
+end
+
+def pbItemRaiseAVCaps(pkmn, stat, scene, capGain = 10, item = nil, happiness = "")
+  if pkmn.avcaps[stat] >= Pokemon::AV_LIMIT_MAX
+    scene.pbDisplay(_INTL("It won't have any effect."))
+    return false
+  end
+  qty = 1
+  if item
+    maxUsage = ((Pokemon::AV_LIMIT_MAX - pkmn.avcaps[stat])/capGain.to_f).ceil
+    maximum = [maxUsage,$PokemonBag.pbQuantity(item)].min
+    qty = scene.pbChooseNumber(
+      _INTL("How many {1} do you want to use?", GameData::Item.get(item).name_plural), maximum, 1)
+    return false if qty == 0
+    $PokemonBag.pbDeleteItem(item, qty - 1)
+  end
+  if pbJustRaiseAwakeningValueCaps(pkmn, stat, capGain * qty) == 0
+    scene.pbDisplay(_INTL("It won't have any effect."))
+    return false
+  end
+  scene.pbRefresh
+  statName = GameData::Stat.get(stat).id
+  scene.pbDisplay(_INTL("{1}'s {2} can now go higher!",pkmn.name,statName))
+  qty.times do; pkmn.changeHappiness(happiness); end
+  return true
+end
+
+def pbItemRaiseSpecialAVCaps(pkmn, scene, capGain = 5, item = nil, happiness = "")
+  if pkmn.avcaps[:SPECIAL_ATTACK] >= Pokemon::AV_LIMIT_MAX && pkmn.avcaps[:SPECIAL_DEFENSE] >= Pokemon::AV_LIMIT_MAX
+    scene.pbDisplay(_INTL("It won't have any effect."))
+    return false
+  end
+  qty = 1
+  raisedsatk = true
+  raisedsdef = true
+  if item
+    maxUsageAtk = ((Pokemon::AV_LIMIT_MAX - pkmn.avcaps[:SPECIAL_ATTACK])/capGain.to_f).ceil
+    maxUsageDef = ((Pokemon::AV_LIMIT_MAX - pkmn.avcaps[:SPECIAL_DEFENSE])/capGain.to_f).ceil
+    maximum = [[maxUsageAtk, maxUsageDef].min, $PokemonBag.pbQuantity(item)].min
+    qty = scene.pbChooseNumber(
+      _INTL("How many {1} do you want to use?", GameData::Item.get(item).name_plural), maximum, 1)
+    return false if qty == 0
+    $PokemonBag.pbDeleteItem(item, qty - 1)
+  end
+  if (pbJustRaiseAwakeningValueCaps(pkmn, :SPECIAL_ATTACK, capGain * qty) == 0)
+    raisedsatk = false
+  end
+  if (pbJustRaiseAwakeningValueCaps(pkmn, :SPECIAL_DEFENSE, capGain * qty) == 0)
+    raisedsdef = false
+  end
+  if !(raisedsatk && raisedsdef)
+      scene.pbDisplay(_INTL("It won't have any effect."))
+      return false
+  end
+  scene.pbRefresh
+  scene.pbDisplay(_INTL("{1}'s{2}{3}{4} can now go higher!",pkmn.name, (raisedsatk ? " Special Attack" : ""),
+                                                                        ((raisedsatk && raisedsdef) ? " and" : ""),
+                                                                        (raisedsdef ? " Special Defense" : "")))
+  qty.times do; pkmn.changeHappiness(happiness); end
   return true
 end
 

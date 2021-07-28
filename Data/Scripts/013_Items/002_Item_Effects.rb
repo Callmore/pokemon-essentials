@@ -1292,3 +1292,122 @@ ItemHandlers::UseOnPokemon.add(:REINSOFUNITY,proc { |item,pkmn,scene|
   }
   next true
 })
+
+#AV candy
+ItemHandlers::UseOnPokemon.add(:AVHPCANDY,proc { |item,pkmn,scene|
+  ret = pbItemRaiseAV(pkmn, :HP, scene, 0, item, "vitamin")
+  next ret
+})
+
+ItemHandlers::UseOnPokemon.add(:AVATKCANDY,proc { |item,pkmn,scene|
+  ret = pbItemRaiseAV(pkmn, :ATTACK, scene, 0, item, "vitamin")
+  next ret
+})
+
+ItemHandlers::UseOnPokemon.add(:AVDEFCANDY,proc { |item,pkmn,scene|
+  ret = pbItemRaiseAV(pkmn, :DEFENSE, scene, 0, item, "vitamin")
+  next ret
+})
+
+ItemHandlers::UseOnPokemon.add(:AVSATKCANDY,proc { |item,pkmn,scene|
+  ret = pbItemRaiseAV(pkmn, :SPECIAL_ATTACK, scene, 0, item, "vitamin")
+  next ret
+})
+
+ItemHandlers::UseOnPokemon.add(:AVSDEFCANDY,proc { |item,pkmn,scene|
+  ret = pbItemRaiseAV(pkmn, :SPECIAL_DEFENSE, scene, 0, item, "vitamin")
+  next ret
+})
+
+ItemHandlers::UseOnPokemon.add(:AVSPDCANDY,proc { |item,pkmn,scene|
+  ret = pbItemRaiseAV(pkmn, :SPEED, scene, 0, item, "vitamin")
+  next ret
+})
+
+#L AV candy
+ItemHandlers::UseOnPokemon.add(:AVHPCANDYL,proc { |item,pkmn,scene|
+  ret = pbItemRaiseAV(pkmn, :HP, scene, 1, item, "vitamin")
+  next ret
+})
+
+ItemHandlers::UseOnPokemon.add(:AVATKCANDYL,proc { |item,pkmn,scene|
+  ret = pbItemRaiseAV(pkmn, :ATTACK, scene, 1, item, "vitamin")
+  next ret
+})
+
+ItemHandlers::UseOnPokemon.add(:AVDEFCANDYL,proc { |item,pkmn,scene|
+  ret = pbItemRaiseAV(pkmn, :DEFENSE, scene, 1, item, "vitamin")
+  next ret
+})
+
+ItemHandlers::UseOnPokemon.add(:AVSATKCANDYL,proc { |item,pkmn,scene|
+  ret = pbItemRaiseAV(pkmn, :SPECIAL_ATTACK, scene, 1, item, "vitamin")
+  next ret
+})
+
+ItemHandlers::UseOnPokemon.add(:AVSDEFCANDYL,proc { |item,pkmn,scene|
+  ret = pbItemRaiseAV(pkmn, :SPECIAL_DEFENSE, scene, 1, item, "vitamin")
+  next ret
+})
+
+ItemHandlers::UseOnPokemon.add(:AVSPDCANDYL,proc { |item,pkmn,scene|
+  ret = pbItemRaiseAV(pkmn, :SPEED, scene, 1, item, "vitamin")
+  next ret
+})
+
+#XL AV candy
+ItemHandlers::UseOnPokemon.add(:AVHPCANDYXL,proc { |item,pkmn,scene|
+  ret = pbItemRaiseAV(pkmn, :HP, scene, 2, item, "vitamin")
+  next ret
+})
+
+ItemHandlers::UseOnPokemon.add(:AVATKCANDYXL,proc { |item,pkmn,scene|
+  ret = pbItemRaiseAV(pkmn, :ATTACK, scene, 2, item, "vitamin")
+  next ret
+})
+
+ItemHandlers::UseOnPokemon.add(:AVDEFCANDYXL,proc { |item,pkmn,scene|
+  ret = pbItemRaiseAV(pkmn, :DEFENSE, scene, 2, item, "vitamin")
+  next ret
+})
+
+ItemHandlers::UseOnPokemon.add(:AVSATKCANDYXL,proc { |item,pkmn,scene|
+  ret = pbItemRaiseAV(pkmn, :SPECIAL_ATTACK, scene, 2, item, "vitamin")
+  next ret
+})
+
+ItemHandlers::UseOnPokemon.add(:AVSDEFCANDYXL,proc { |item,pkmn,scene|
+  ret = pbItemRaiseAV(pkmn, :SPECIAL_DEFENSE, scene, 2, item, "vitamin")
+  next ret
+})
+
+ItemHandlers::UseOnPokemon.add(:AVSPDCANDYXL,proc { |item,pkmn,scene|
+  ret = pbItemRaiseAV(pkmn, :SPEED, scene, 2, item, "vitamin")
+  next ret
+})
+
+#AV creams (projectOriginality)
+ItemHandlers::UseOnPokemon.add(:AVHPCREAM,proc { |item,pkmn,scene|
+  ret =  pbItemRaiseAVCaps(pkmn, :HP, scene, 10, item, "evberry")
+  next ret
+})
+
+ItemHandlers::UseOnPokemon.add(:AVATKCREAM,proc { |item,pkmn,scene|
+  ret =  pbItemRaiseAVCaps(pkmn, :ATTACK, scene, 10, item, "evberry")
+  next ret
+})
+
+ItemHandlers::UseOnPokemon.add(:AVDEFCREAM,proc { |item,pkmn,scene|
+  ret =  pbItemRaiseAVCaps(pkmn, :DEFENSE, scene, 10, item, "evberry")
+  next ret
+})
+
+ItemHandlers::UseOnPokemon.add(:AVSPDCREAM,proc { |item,pkmn,scene|
+  ret = pbItemRaiseAVCaps(pkmn, :SPEED, scene, 10, item, "evberry")
+  next ret
+})
+
+ItemHandlers::UseOnPokemon.add(:AVSPECCREAM,proc { |item,pkmn,scene|
+  ret = pbItemRaiseSpecialAVCaps(pkmn, scene, 5, item, "evberry")
+  next ret
+})

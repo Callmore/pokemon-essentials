@@ -106,11 +106,30 @@ class Pokemon
   MAX_NAME_SIZE = 10
   # Maximum number of moves a Pokémon can know at once
   MAX_MOVES     = 4
+  
   #projectOriginality
   # starting max AVs for a stat
   AV_LIMIT      = 25
   # max AVs a single stat can have
   AV_LIMIT_MAX  = 75
+
+  # level 1 AV candy cap
+  AV_CANDY_MAX = 38
+  # level 1 AV candy min level
+  AV_CANDY_LV = 0
+  # level 2 AV candy cap
+  AV_CANDY_L_MAX = 50
+  # level 2 AV candy min level
+  AV_CANDY_L_LV = 30
+  # level 3 AV candy cap
+  AV_CANDY_XL_MAX = AV_LIMIT_MAX
+  # level 3 AV candy min level
+  AV_CANDY_XL_LV = 60
+
+  # AV cream Special stat increase
+  AV_CREAM_SPECUP = 5
+  # AV cream other stat increase
+  AV_CREAM_OTHERUP = 10
 
   def self.play_cry(species, form = 0, volume = 90, pitch = 100)
     GameData::Species.play_cry_from_species(species, form, volume, pitch)
