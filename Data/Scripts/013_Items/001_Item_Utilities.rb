@@ -446,8 +446,8 @@ def pbItemRaiseAV(pkmn, stat, scene, size = 0, item = nil, happiness = "")
     return false
   end
   scene.pbRefresh
-  statName = GameData::Stat.get(stat).id
-  scene.pbDisplay(_INTL("{1}'s {2} increased.",pkmn.name,statName))
+  statName = GameData::Stat.get(stat).name
+  scene.pbDisplay(_INTL("{1}'s {2} increased.",pkmn.name, statName))
   qty.times do; pkmn.changeHappiness(happiness); end
   return true
 end
@@ -484,7 +484,7 @@ def pbItemRaiseAVCaps(pkmn, stat, scene, capGain = 10, item = nil, happiness = "
     return false
   end
   scene.pbRefresh
-  statName = GameData::Stat.get(stat).id
+  statName = GameData::Stat.get(stat).name
   scene.pbDisplay(_INTL("{1}'s {2} can now go higher!",pkmn.name,statName))
   qty.times do; pkmn.changeHappiness(happiness); end
   return true
