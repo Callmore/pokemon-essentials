@@ -325,6 +325,10 @@ class PokeBattle_Move
     if user.effects[PBEffects::Charge]>0 && type == :ELECTRIC
       multipliers[:base_damage_multiplier] *= 2
     end
+    #projectOriginality Base
+    if user.effects[PBEffects::SmolderInstall] > 0 && type == :FIRE
+      multipliers[:base_damage_multiplier] *= 1.5
+    end
     # Mud Sport
     if type == :ELECTRIC
       @battle.eachBattler do |b|

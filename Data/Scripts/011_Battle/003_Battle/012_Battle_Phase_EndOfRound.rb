@@ -477,6 +477,10 @@ class PokeBattle_Battle
         battler.pbSleep
       end
     }
+    # Smoulder Install
+    pbEORCountDownBattlerEffect(priority,PBEffects::SmolderInstall) { |battler|
+      pbDisplay(_INTL("{1}'s Smolder Install wore off!", battler.pbThis))
+    }
     # Perish Song
     perishSongUsers = []
     priority.each do |b|
@@ -636,6 +640,7 @@ class PokeBattle_Battle
       b.effects[PBEffects::SpikyShield]      = false
       b.effects[PBEffects::Spotlight]        = 0
       b.effects[PBEffects::ThroatChop]       -= 1 if b.effects[PBEffects::ThroatChop]>0
+      b.effects[PBEffects::SmolderInstall]   -= 1 if b.effects[PBEffects::SmolderInstall]>0
       b.lastHPLost                           = 0
       b.lastHPLostFromFoe                    = 0
       b.tookDamage                           = false

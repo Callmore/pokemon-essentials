@@ -116,6 +116,8 @@ begin
     WaterSport          = 110
     WeightChange        = 111
     Yawn                = 112
+    #projectOriginality (start at 200)
+    SmolderInstall      = 200
 
     #===========================================================================
     # These effects apply to a battler position
