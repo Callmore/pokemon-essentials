@@ -95,7 +95,7 @@ class PokeBattle_Battle
           evTotal += evGain
         end
       end
-    #end
+    end
   end
 
   def pbGainExpOne(idxParty,defeatedBattler,numPartic,expShare,expAll,showMessages=true)
