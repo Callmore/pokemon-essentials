@@ -17,10 +17,10 @@ def getBattlerAltitude(battler)
   return ret
 end
 #-------------------------------------------------------------------------------
-def playBattlerCry(battler)
+def playBattlerCry(battler, context = "")
   pokemon = battler.displayPokemon
   pokemon = :BIDOOF if GameData::Species.exists?(:BIDOOF) && defined?(firstApr?) && firstApr?
-  cry = GameData::Species.cry_filename_from_pokemon(pokemon)
+  cry = GameData::Species.cry_filename_from_pokemon(pokemon, context)
   pbSEPlay(cry)
 end
 #-------------------------------------------------------------------------------

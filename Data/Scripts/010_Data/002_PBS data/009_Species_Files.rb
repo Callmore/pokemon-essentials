@@ -173,58 +173,77 @@ module GameData
 
     #===========================================================================
 
-    def self.check_cry_file(species, form)
+    def self.check_cry_file(species, form, context = "")
       species_data = self.get_species_form(species, form)
       return nil if species_data.nil?
       if form > 0
-        ret = sprintf("Cries/%s_%d", species_data.species, form)
+        ret = sprintf("Cries/%s_%d_", species_data.species, form, context.upcase)
+        fallback = sprintf("Cries/%s_%d", species_data.species, form)
+        return ret if pbResolveAudioSE(ret)
+        return fallback if pbResolveAudioSE(fallback)
+      end
+      ret = sprintf("Cries/%s_%s", species_data.species, context.upcase)
+      fallback = sprintf("Cries/%s", species_data.species)
+      return ret if pbResolveAudioSE(ret)
+      return pbResolveAudioSE(fallback) ? fallback : nil
+    end
+
+    def self.check_cry_file_absolute(species, form, context = "")
+      species_data = self.get_species_form(species, form)
+      return nil if species_data.nil?
+      if form > 0
+        ret = sprintf("Cries/%s_%d_", species_data.species, form, context.upcase)
         return ret if pbResolveAudioSE(ret)
       end
-      ret = sprintf("Cries/%s", species_data.species)
-      return (pbResolveAudioSE(ret)) ? ret : nil
+      ret = sprintf("Cries/%s_%s", species_data.species, context.upcase)
+      return pbResolveAudioSE(ret) ? ret : nil
     end
 
-    def self.cry_filename(species, form = 0)
-      return self.check_cry_file(species, form)
+    def self.cry_filename(species, form = 0, context = "")
+      return self.check_cry_file(species, form, context)
     end
 
-    def self.cry_filename_from_pokemon(pkmn)
-      return self.check_cry_file(pkmn.species, pkmn.form)
+    def self.cry_filename_from_pokemon(pkmn, context = "")
+      return self.check_cry_file(pkmn.species, pkmn.form, context)
     end
 
-    def self.play_cry_from_species(species, form = 0, volume = 90, pitch = 100)
-      filename = self.cry_filename(species, form)
+    def self.cry_filename_from_pokemon_absolute(pkmn, context = "")
+      return self.check_cry_file_absolute(pkmn.species, pkmn.form, context)
+    end
+
+    def self.play_cry_from_species(species, form = 0, volume = 90, pitch = 100, context = "")
+      filename = self.cry_filename(species, form, context)
       return if !filename
       pbSEPlay(RPG::AudioFile.new(filename, volume, pitch)) rescue nil
     end
 
-    def self.play_cry_from_pokemon(pkmn, volume = 90, pitch = nil)
+    def self.play_cry_from_pokemon(pkmn, volume = 90, pitch = nil, context = "")
       return if !pkmn || pkmn.egg?
-      filename = self.cry_filename_from_pokemon(pkmn)
+      filename = self.cry_filename_from_pokemon(pkmn, context)
       return if !filename
       pitch ||= 75 + (pkmn.hp * 25 / pkmn.totalhp)
       pbSEPlay(RPG::AudioFile.new(filename, volume, pitch)) rescue nil
     end
 
-    def self.play_cry(pkmn, volume = 90, pitch = nil)
+    def self.play_cry(pkmn, volume = 90, pitch = nil, context = "")
       if pkmn.is_a?(Pokemon)
-        self.play_cry_from_pokemon(pkmn, volume, pitch)
+        self.play_cry_from_pokemon(pkmn, volume, pitch, context)
       else
-        self.play_cry_from_species(pkmn, nil, volume, pitch)
+        self.play_cry_from_species(pkmn, nil, volume, pitch, context)
       end
     end
 
-    def self.cry_length(species, form = 0, pitch = 100)
+    def self.cry_length(species, form = 0, pitch = 100, context = "")
       return 0 if !species || pitch <= 0
       pitch = pitch.to_f / 100
       ret = 0.0
       if species.is_a?(Pokemon)
         if !species.egg?
-          filename = pbResolveAudioSE(GameData::Species.cry_filename_from_pokemon(species))
+          filename = pbResolveAudioSE(GameData::Species.cry_filename_from_pokemon(species, context))
           ret = getPlayTime(filename) if filename
         end
       else
-        filename = pbResolveAudioSE(GameData::Species.cry_filename(species, form))
+        filename = pbResolveAudioSE(GameData::Species.cry_filename(species, form, context))
         ret = getPlayTime(filename) if filename
       end
       ret /= pitch   # Sound played at a lower pitch lasts longer

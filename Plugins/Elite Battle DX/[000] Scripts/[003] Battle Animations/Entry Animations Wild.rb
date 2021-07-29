@@ -676,7 +676,7 @@ class SunMoonSpeciesTransitions
     @sprites["impact"].y = @viewport.height/2
     @sprites["impact"].z = 999
     @sprites["impact"].opacity = 0
-    pbSEPlay(GameData::Species.cry_filename(@species.id, @form))
+    pbSEPlay(GameData::Species.cry_filename(@species.id, @form, "SENDOUT"))
     @scene.pbShowPartyLineup(0) if EliteBattle::SHOW_LINEUP_WILD
     @sprites["background"].show
     k = -1

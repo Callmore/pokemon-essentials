@@ -566,7 +566,7 @@ class PokemonBattlerSprite < RPG::Sprite
   # recommendation is to create a PictureEx animation and push it into
   # the @battleAnimations array.
   def pbPlayIntroAnimation(pictureEx=nil)
-    @pkmn.play_cry if @pkmn
+    @pkmn.play_cry(90, nil, "SENDOUT") if @pkmn
   end
 
   QUARTER_ANIM_PERIOD = Graphics.frame_rate*3/20
