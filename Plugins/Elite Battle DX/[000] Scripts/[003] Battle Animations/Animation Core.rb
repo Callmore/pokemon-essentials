@@ -201,8 +201,14 @@ class PokeBattle_Scene
     poke.resetParticles
     databox = @sprites["dataBox_#{pkmn.index}"]
     # play cry
-    playBattlerCry(@battlers[pkmn.index])
-    self.wait(GameData::Species.cry_length(pkmn.species, pkmn.form), true)
+    cry = GameData::Species.cry_filename_from_pokemon_absolute(@battlers[pkmn.index].displayPokemon, "FAINT")
+    if cry
+      playBattlerCry(@battlers[pkmn.index], "FAINT") if cry
+      self.wait(GameData::Species.cry_length(pkmn.species, pkmn.form, 100, "FAINT"), true) if cry
+    else
+      playBattlerCry(@battlers[pkmn.index])
+      self.wait(GameData::Species.cry_length(pkmn.species, pkmn.form), true)
+    end
     # begin animation
     pbSEPlay("Pkmn faint")
     poke.showshadow = false
@@ -264,6 +270,9 @@ class PokeBattle_Scene
       indexes.push(t[0].index)
       @sprites["dataBox_#{t[0].index}"].damage
       @sprites["dataBox_#{t[0].index}"].animateHP(t[1], t[0].hp)
+
+      cry = GameData::Species.cry_filename_from_pokemon_absolute(t[0].displayPokemon, "HURT")
+      playBattlerCry(t[0], "HURT") if cry
     end
     # play damage SE
     case effect.max

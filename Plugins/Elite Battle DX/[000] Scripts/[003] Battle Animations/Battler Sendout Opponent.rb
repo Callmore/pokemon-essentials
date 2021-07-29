@@ -82,7 +82,7 @@ class PokeBattle_Scene
       @sprites["pokemon_#{i}"].zoom_x = 0
       @sprites["pokemon_#{i}"].zoom_y = 0
       @sprites["dataBox_#{i}"].appear
-      playBattlerCry(battler)
+      playBattlerCry(battler, "SENDOUT")
       burst["#{i}"] = EBBallBurst.new(@viewport, @sprites["pokeball#{i}"].x, @sprites["pokeball#{i}"].y, 19, 1, pkmn.poke_ball)
     end
     # starting Pokemon release animation

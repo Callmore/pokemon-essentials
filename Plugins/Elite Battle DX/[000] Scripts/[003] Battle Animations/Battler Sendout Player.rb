@@ -10,7 +10,7 @@ class PokeBattle_Scene
     # skip for followers
     if sendOuts.length < 2 && !EliteBattle.follower(@battle).nil?
       clearMessageWindow(true)
-      playBattlerCry(@battlers[EliteBattle.follower(@battle)])
+      playBattlerCry(@battlers[EliteBattle.follower(@battle)], "SENDOUT")
       @firstsendout = false
       return
     end
@@ -123,7 +123,7 @@ class PokeBattle_Scene
     sendOuts.each_with_index do |b, m|
       battler = @battlers[b[0]]; i = battler.index
       pkmn = @battle.battlers[b[0]].effects[PBEffects::Illusion] || b[1]
-      playBattlerCry(battler)
+      playBattlerCry(battler, "SENDOUT")
       next if i == EliteBattle.follower(@battle)
       @sprites["pokemon_#{i}"].visible = true
       @sprites["pokemon_#{i}"].y -= 120 + (orgcord[m] - @sprites["pokemon_#{i}"].oy)*z3 if !dig[m]

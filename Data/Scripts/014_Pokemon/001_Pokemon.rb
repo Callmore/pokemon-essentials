@@ -100,12 +100,14 @@ class Pokemon
   # Maximum number of moves a Pokémon can know at once
   MAX_MOVES     = 4
 
-  def self.play_cry(species, form = 0, volume = 90, pitch = 100)
-    GameData::Species.play_cry_from_species(species, form, volume, pitch)
+  def self.play_cry(species, form = 0, volume = 90, pitch = 100, context = "")
+    GameData::Species.play_cry_from_species(species, form, volume, pitch, context)
   end
 
-  def play_cry(volume = 90, pitch = nil)
-    GameData::Species.play_cry_from_pokemon(self, volume, pitch)
+  def play_cry(volume = 90, pitch = nil, context = "")
+    GameData::Species.play_cry_from_pokemon(self, volume, pitch, context)
+    echo(context)
+    echo("\n")
   end
 
   def inspect
