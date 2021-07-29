@@ -78,7 +78,24 @@ class PokeBattle_Battle
         pkmn.ev[s.id] += evGain
         evTotal += evGain
       end
-    end
+      # Gain EVs for each stat in turn
+      if pkmn.shadowPokemon? && pkmn.saved_ev
+        pkmn.saved_ev.each_value { |e| evTotal += e }
+        GameData::Stat.each_main do |s|
+          evGain = evYield[s.id].clamp(0, Pokemon::EV_STAT_LIMIT - pkmn.ev[s.id] - pkmn.saved_ev[s.id])
+          evGain = evGain.clamp(0, Pokemon::EV_LIMIT - evTotal)
+          pkmn.saved_ev[s.id] += evGain
+          evTotal += evGain
+        end
+      else
+        GameData::Stat.each_main do |s|
+          evGain = evYield[s.id].clamp(0, Pokemon::EV_STAT_LIMIT - pkmn.ev[s.id])
+          evGain = evGain.clamp(0, Pokemon::EV_LIMIT - evTotal)
+          pkmn.ev[s.id] += evGain
+          evTotal += evGain
+        end
+      end
+    #end
   end
 
   def pbGainExpOne(idxParty,defeatedBattler,numPartic,expShare,expAll,showMessages=true)
@@ -184,6 +201,20 @@ class PokeBattle_Battle
       end
       # Levelled up
       pbCommonAnimation("LevelUp",battler) if battler
+      # choose a random stat to give an AV point to
+      #if pkmn.useavs
+        avGainPossible = []
+        rewardIdx = 0
+        GameData::Stat.each_main do |s|
+          if pkmn.av[s.id] < pkmn.avcaps[s.id]
+            avGainPossible.push(s.id)
+          end
+        end
+        if avGainPossible.length > 0
+          rewardIdx = rand(avGainPossible.length)
+          pkmn.av[avGainPossible[rewardIdx]] += 1
+        end
+      #end
       oldTotalHP = pkmn.totalhp
       oldAttack  = pkmn.attack
       oldDefense = pkmn.defense
