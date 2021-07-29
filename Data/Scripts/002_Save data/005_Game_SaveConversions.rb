@@ -114,12 +114,6 @@ SaveData.register_conversion(:v19_convert_global_metadata) do
         global.roamPokemon[i] = PokeBattle_Pokemon.convert(pkmn) if pkmn && pkmn != true
       end
     end
-    global.purifyChamber.sets.each do |set|
-      set.shadow = PokeBattle_Pokemon.convert(set.shadow) if set.shadow
-      set.list.each_with_index do |pkmn, i|
-        set.list[i] = PokeBattle_Pokemon.convert(pkmn) if pkmn
-      end
-    end
     if global.hallOfFame
       global.hallOfFame.each do |team|
         next if !team

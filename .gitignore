@@ -1,7 +1,7 @@
 # Audio, Graphics and Plugins folders
 Audio/
 Graphics/
-Plugins/
+# Plugins/ (We want to sync them so)
 
 # Data folder, but not Data/Scripts folder
 Data/*

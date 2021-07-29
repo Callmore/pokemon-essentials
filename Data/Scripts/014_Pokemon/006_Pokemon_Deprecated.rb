@@ -79,9 +79,7 @@ class PokeBattle_Pokemon
     ret.hp               = pkmn.hp
     if pkmn.shadow
       ret.shadow         = pkmn.shadow
-      ret.heart_gauge    = pkmn.heartgauge
       ret.hyper_mode     = pkmn.hypermode
-      ret.saved_exp      = pkmn.savedexp
       if pkmn.savedev
         GameData::Stat.each_main { |s| ret.saved_ev[s.id] = pkmn.savedev[s.pbs_order] if s.pbs_order >= 0 }
       end

@@ -864,18 +864,26 @@ PokemonDebugMenuCommands.register("setshininess", {
     cmd = 0
     loop do
       msg = [_INTL("Is shiny."), _INTL("Is normal (not shiny).")][pkmn.shiny? ? 0 : 1]
+      msg = _INTL("Is square shiny.") if pkmn.square_shiny?
       cmd = screen.pbShowCommands(msg, [
            _INTL("Make shiny"),
+           _INTL("Make square shiny"),
            _INTL("Make normal"),
            _INTL("Reset")], cmd)
       break if cmd < 0
       case cmd
       when 0   # Make shiny
-        pkmn.shiny = true
-      when 1   # Make normal
-        pkmn.shiny = false
-      when 2   # Reset
-        pkmn.shiny = nil
+        pkmn.shiny        = true
+        pkmn.square_shiny = nil
+      when 1
+        pkmn.square_shiny = true
+        pkmn.shiny        = nil
+      when 2   # Make normal
+        pkmn.square_shiny = false
+        pkmn.shiny        = false
+      when 3   # Reset
+        pkmn.square_shiny = nil
+        pkmn.shiny        = nil
       end
       screen.pbRefreshSingle(pkmnid)
     end
@@ -1073,11 +1081,8 @@ PokemonDebugMenuCommands.register("shadowpkmn", {
     cmd = 0
     loop do
       msg = [_INTL("Not a Shadow Pokémon."),
-             _INTL("Heart gauge is {1} (stage {2}).", pkmn.heart_gauge, pkmn.heartStage)
-            ][pkmn.shadowPokemon? ? 1 : 0]
-      cmd = screen.pbShowCommands(msg, [
-         _INTL("Make Shadow"),
-         _INTL("Set heart gauge")], cmd)
+             _INTL("Is a Shadow Pokémon.")][pkmn.shadowPokemon? ? 1 : 0]
+      cmd = screen.pbShowCommands(msg, [_INTL("Make Shadow")], cmd)
       break if cmd < 0
       case cmd
       when 0   # Make Shadow
@@ -1086,22 +1091,6 @@ PokemonDebugMenuCommands.register("shadowpkmn", {
           screen.pbRefreshSingle(pkmnid)
         else
           screen.pbDisplay(_INTL("{1} is already a Shadow Pokémon.", pkmn.name))
-        end
-      when 1   # Set heart gauge
-        if pkmn.shadowPokemon?
-          oldheart = pkmn.heart_gauge
-          params = ChooseNumberParams.new
-          params.setRange(0, Pokemon::HEART_GAUGE_SIZE)
-          params.setDefaultValue(pkmn.heart_gauge)
-          val = pbMessageChooseNumber(
-             _INTL("Set the heart gauge (max. {1}).", Pokemon::HEART_GAUGE_SIZE),
-             params) { screen.pbUpdate }
-          if val != oldheart
-            pkmn.adjustHeart(val - oldheart)
-            pkmn.check_ready_to_purify
-          end
-        else
-          screen.pbDisplay(_INTL("{1} is not a Shadow Pokémon.", pkmn.name))
         end
       end
     end
