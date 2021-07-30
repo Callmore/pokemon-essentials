@@ -585,6 +585,8 @@ class PokeBattle_Battler
     return true if @effects[PBEffects::Outrage]>0
     return true if @effects[PBEffects::Uproar]>0
     return true if @effects[PBEffects::Bide]>0
+
+    return true if @effects[PBEffects::GraveDigger]>0
     return false
   end
 

@@ -58,6 +58,18 @@ class PokeBattle_Battler
           user.effects[PBEffects::DestinyBondTarget] = target.index
         end
       end
+
+      #projectOriginality on multihit effects
+      #Plasma Cover
+      if target.effects[PBEffects::PlasmaCover]
+        PBDebug.log("[Lingering effect] #{target.pbThis}'s Plasma Cover")
+        if move.pbContactMove?(user) && user.affectedByContactEffect?
+          @battle.pbDisplay(_INTL("{1} was hurt by {2}'s Plasma Cover!",
+            user.pbThis, target.pbThis))
+          target.pbParalyze(user) if target.pbCanParalyze?(user,false,self)
+          target.pbReduceHP((15*user.hp/100).round,false)
+        end
+      end
     end
   end
 

@@ -118,6 +118,8 @@ begin
     Yawn                = 112
     #projectOriginality (start at 200)
     SmolderInstall      = 200
+    GraveDigger         = 201
+    PlasmaCover          = 202
 
     #===========================================================================
     # These effects apply to a battler position

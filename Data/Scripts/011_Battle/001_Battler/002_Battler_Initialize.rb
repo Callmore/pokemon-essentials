@@ -282,6 +282,8 @@ class PokeBattle_Battler
 
     #projectOriginality
     @effects[PBEffects::SmolderInstall]      = 0
+    @effects[PBEffects::GraveDigger]         = 0
+    @effects[PBEffects::PlasmaCover]          = false
 
   end
 

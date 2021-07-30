@@ -100,6 +100,8 @@ class PokeBattle_Battler
     @effects[PBEffects::Outrage]       = 0
     @effects[PBEffects::Uproar]        = 0
     @effects[PBEffects::Bide]          = 0
+    # projectOriginality
+    @effects[PBEffects::GraveDigger]       = 0
     @currentMove = nil
     # Reset counters for moves which increase them when used in succession
     @effects[PBEffects::FuryCutter]    = 0
