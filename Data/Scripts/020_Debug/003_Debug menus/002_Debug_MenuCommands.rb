@@ -160,24 +160,6 @@ DebugMenuCommands.register("daycare", {
   }
 })
 
-DebugMenuCommands.register("relicstone", {
-  "parent"      => "fieldmenu",
-  "name"        => _INTL("Use Relic Stone"),
-  "description" => _INTL("Shadow Pokémon. Choose a Pokémon to show to the Relic Stone for purification."),
-  "effect"      => proc {
-    pbRelicStone
-  }
-})
-
-DebugMenuCommands.register("purifychamber", {
-  "parent"      => "fieldmenu",
-  "name"        => _INTL("Use Purify Chamber"),
-  "description" => _INTL("Shadow Pokémon. Open the Purify Chamber for purification."),
-  "effect"      => proc {
-    pbPurifyChamber
-  }
-})
-
 #===============================================================================
 # Battle options
 #===============================================================================
@@ -491,7 +473,7 @@ DebugMenuCommands.register("fillbag", {
     params.setCancelValue(0)
     qty = pbMessageChooseNumber(_INTL("Choose the number of items."), params)
     if qty > 0
-      GameData::Item.each { |i| $PokemonBag.pbStoreItem(i.id, qty) }
+      GameData::Item.each { |i| $PokemonBag.pbStoreItem(i.id, qty, false)}
       pbMessage(_INTL("The Bag was filled with {1} of each item.", qty))
     end
   }

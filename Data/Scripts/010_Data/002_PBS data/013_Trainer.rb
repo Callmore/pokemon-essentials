@@ -27,8 +27,10 @@ module GameData
       "Nature"       => [:nature,        "e", :Nature],
       "IV"           => [:iv,            "uUUUUU"],
       "EV"           => [:ev,            "uUUUUU"],
+      "AV"           => [:av,            "uUUUUU"],
       "Happiness"    => [:happiness,     "u"],
       "Shiny"        => [:shininess,     "b"],
+      "SquareShiny"  => [:square_shiny,  "b"],
       "Shadow"       => [:shadowness,    "b"],
       "Ball"         => [:poke_ball,     "s"],
     }
@@ -83,6 +85,7 @@ module GameData
         GameData::Stat.each_main do |s|
           pkmn[:iv][s.id] ||= 0 if pkmn[:iv]
           pkmn[:ev][s.id] ||= 0 if pkmn[:ev]
+          pkmn[:av][s.id] ||= 0 if pkmn[:av]
         end
       end
     end
@@ -132,6 +135,7 @@ module GameData
         pkmn.ability = pkmn_data[:ability]
         pkmn.gender = pkmn_data[:gender] || ((trainer.male?) ? 0 : 1)
         pkmn.shiny = (pkmn_data[:shininess]) ? true : false
+        pkmn.square_shiny = (pkmn_data[:square_shiny]) ? true : false
         if pkmn_data[:nature]
           pkmn.nature = pkmn_data[:nature]
         else
@@ -148,6 +152,11 @@ module GameData
             pkmn.ev[s.id] = pkmn_data[:ev][s.id]
           else
             pkmn.ev[s.id] = [pkmn_data[:level] * 3 / 2, Pokemon::EV_LIMIT / 6].min
+          end
+          if pkmn_data[:av]
+            pkmn.av[s.id] = pkmn_data[:av][s.id]
+          else
+            pkmn.av[s.id] = [pkmn_data[:level] * 4 / 3, pkmn.happiness / 8].min
           end
         end
         pkmn.happiness = pkmn_data[:happiness] if pkmn_data[:happiness]

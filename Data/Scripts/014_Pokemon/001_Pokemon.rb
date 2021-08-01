@@ -80,6 +80,21 @@ class Pokemon
   attr_accessor :fused
   # @return [Integer] this Pokémon's personal ID
   attr_accessor :personalID
+  #projectOriginality
+  # @return [Hash<Integer>] mon AV caps
+  attr_accessor :avcaps
+  # @return [Boolean] mon uses AVs instead of EVs
+  attr_accessor :useavs
+  # @return [Hash<Integer>] this Pokémon's awakening values
+  attr_accessor :av
+  # @return [Integer] the damage dealt to the Pokémon before fainting in battle
+  attr_accessor :damage_done
+  # @return [Integer] the critical hits scored by the Pokémon before fainting in battle
+  attr_accessor :critical_hits
+  # @return [Integer] the amount of evolution candies fed to a Pokemon.
+  attr_accessor :candies_fed
+  # @return [Boolean] whether the Pokemon is a Brilliant Pokemon or no
+  attr_accessor :brilliant
 
   # Max total IVs
   IV_STAT_LIMIT = 31
@@ -91,13 +106,39 @@ class Pokemon
   MAX_NAME_SIZE = 10
   # Maximum number of moves a Pokémon can know at once
   MAX_MOVES     = 4
+  
+  #projectOriginality
+  # starting max AVs for a stat
+  AV_LIMIT      = 25
+  # max AVs a single stat can have
+  AV_LIMIT_MAX  = 75
 
-  def self.play_cry(species, form = 0, volume = 90, pitch = 100)
-    GameData::Species.play_cry_from_species(species, form, volume, pitch)
+  # level 1 AV candy cap
+  AV_CANDY_MAX = 38
+  # level 1 AV candy min level
+  AV_CANDY_LV = 0
+  # level 2 AV candy cap
+  AV_CANDY_L_MAX = 50
+  # level 2 AV candy min level
+  AV_CANDY_L_LV = 30
+  # level 3 AV candy cap
+  AV_CANDY_XL_MAX = AV_LIMIT_MAX
+  # level 3 AV candy min level
+  AV_CANDY_XL_LV = 60
+
+  # AV cream Special stat increase
+  AV_CREAM_SPECUP = 5
+  # AV cream other stat increase
+  AV_CREAM_OTHERUP = 10
+
+  def self.play_cry(species, form = 0, volume = 90, pitch = 100, context = "")
+    GameData::Species.play_cry_from_species(species, form, volume, pitch, context)
   end
 
-  def play_cry(volume = 90, pitch = nil)
-    GameData::Species.play_cry_from_pokemon(self, volume, pitch)
+  def play_cry(volume = 90, pitch = nil, context = "")
+    GameData::Species.play_cry_from_pokemon(self, volume, pitch, context)
+    echo(context)
+    echo("\n")
   end
 
   def inspect
@@ -152,7 +193,7 @@ class Pokemon
     @ability = nil
     MultipleForms.call("onSetForm", self, value, oldForm)
     calc_stats
-    $Trainer.pokedex.register(self)
+    $Trainer.pokedex.register(self) if $Trainer
   end
 
   # The same as def form=, but yields to a given block in the middle so that a
@@ -201,6 +242,12 @@ class Pokemon
     @level = nil
   end
 
+  # Sets this Pokémon's Exp. Points without resetting the level. Used by Exp Candies
+  # @param value [Integer] new experience points
+  def setExp(value)
+    @exp = value
+  end
+
   # @return [Boolean] whether this Pokémon is an egg
   def egg?
     return @steps_to_hatch > 0
@@ -235,7 +282,10 @@ class Pokemon
   # @param value [Integer] new HP value
   def hp=(value)
     @hp = value.clamp(0, @totalhp)
-    heal_status if @hp == 0
+    if @hp == 0
+      heal_status
+      @damage_done = 0
+    end
   end
 
   # Sets this Pokémon's status. See {GameData::Status} for all possible status effects.
@@ -378,6 +428,7 @@ class Pokemon
 
   # @return [Boolean] whether this Pokémon is shiny (differently colored)
   def shiny?
+    return true if square_shiny?
     if @shiny.nil?
       a = @personalID ^ @owner.id
       b = a & 0xFFFF
@@ -386,6 +437,59 @@ class Pokemon
       @shiny = d < Settings::SHINY_POKEMON_CHANCE
     end
     return @shiny
+  end
+
+  #=============================================================================
+  # Square Shininess
+  #=============================================================================
+  # @return [Boolean] whether this Pokémon is a square sparkle shiny
+  # (differently colored, square sparkles)
+  def square_shiny?
+    if @square_shiny.nil?
+      a = @personalID ^ @owner.id
+      b = a & 0xFFFF
+      c = (a >> 16) & 0xFFFF
+      d = b ^ c
+      @square_shiny = d < (Settings::SHINY_POKEMON_CHANCE/16)
+    end
+    return @square_shiny
+  end
+
+  def square_shiny=(value)
+    @square_shiny = value
+    @shiny = true if @square_shiny
+  end
+
+  #=============================================================================
+  # Brilliance
+  #=============================================================================
+  # Generate Pokemon with the following features.
+  # 2 - 6 max IVs
+  # Higher Avg Level
+  # Knows Egg Move
+  # Has a high chance to be shiny
+
+  def generateBrilliant
+    @brilliant = true
+    # 2- 6 max IVs
+    maxIVs = @iv.keys.sample(2 + (rand(@iv.keys.length) - 2))
+    maxIVs.each { |s| @iv[s] = Pokemon::IV_STAT_LIMIT }
+    # Higher Avg Level
+    @level += (2 + rand(5))
+    # Knows Egg Move
+    babyspecies = species_data.get_baby_species
+    eggmoves = GameData::Species.get_species_form(babyspecies,form_simple).egg_moves
+    move = eggmoves.sample
+    learn_move(move); add_first_move(move)
+    # Has a chance to be shiny
+    shinyBoost = $Trainer.pokedex.number_battled_brilliant_shiny(@species)
+    random = rand(65536)
+    shinyChance = Settings::SHINY_POKEMON_CHANCE * shinyBoost
+    echoln "#{random}, #{shinyChance}"
+    if random < shinyChance
+      @shiny = true
+      self.square_shiny = true if random < (shinyChance/16)
+    end
   end
 
   #=============================================================================
@@ -939,6 +1043,26 @@ class Pokemon
     }
   end
 
+  # Checks whether this Pokemon can evolve because of certain conditions after a battle
+  # @param other_pkmn [Pokemon] the other Pokémon involved in the trade
+  # @return [Symbol, nil] the ID of the species to evolve into
+  def check_evolution_after_battle
+    return check_evolution_internal { |pkmn, new_species, method, parameter|
+      success = GameData::Evolution.get(method).call_on_battle(pkmn, parameter)
+      next (success) ? new_species : nil
+    }
+  end
+
+  # Checks whether this Pokemon can evolve because of certain conditions in an event
+  # @param other_pkmn [Pokemon] the other Pokémon involved in the trade
+  # @return [Symbol, nil] the ID of the species to evolve into
+  def check_evolution_in_event
+    return check_evolution_internal { |pkmn, new_species, method, parameter|
+      success = GameData::Evolution.get(method).call_in_event(pkmn, parameter)
+      next (success) ? new_species : nil
+    }
+  end
+
   # Called after this Pokémon evolves, to remove its held item (if the evolution
   # required it to have a held item) or duplicate this Pokémon (Shedinja only).
   # @param new_species [Pokemon] the species that this Pokémon evolved into
@@ -989,21 +1113,25 @@ class Pokemon
   end
 
   # @return [Integer] the maximum HP of this Pokémon
-  def calcHP(base, level, iv, ev)
+  def calcHP(base, level, iv, eav, use_avs)
     return 1 if base == 1   # For Shedinja
-    return ((base * 2 + iv + (ev / 4)) * level / 100).floor + level + 10
+    return ((base * 2 + iv) * level / 100).floor + level + 10 + eav if use_avs
+    return ((base * 2 + iv + (eav / 4)) * level / 100).floor + level + 10
   end
 
   # @return [Integer] the specified stat of this Pokémon (not used for total HP)
-  def calcStat(base, level, iv, ev, nat)
-    return ((((base * 2 + iv + (ev / 4)) * level / 100).floor + 5) * nat / 100).floor
+  def calcStat(base, level, iv, eav, nat, happiness, use_avs)
+    return (((((base * 2 + iv) * level / 100).floor + 5) * (nat / 100) * happiness / 255).floor + eav) if use_avs
+    return ((((base * 2 + iv + (eav / 4)) * level / 100).floor + 5) * nat / 100).floor
   end
 
   # Recalculates this Pokémon's stats.
   def calc_stats
-    base_stats = self.baseStats
-    this_level = self.level
-    this_IV    = self.calcIV
+    base_stats       = self.baseStats
+    this_level       = self.level
+    this_IV          = self.calcIV
+    this_happiness   = self.happiness
+    use_avs          = self.useavs
     # Format stat multipliers due to nature
     nature_mod = {}
     GameData::Stat.each_main { |s| nature_mod[s.id] = 100 }
@@ -1015,9 +1143,17 @@ class Pokemon
     stats = {}
     GameData::Stat.each_main do |s|
       if s.id == :HP
-        stats[s.id] = calcHP(base_stats[s.id], this_level, this_IV[s.id], @ev[s.id])
+        if use_avs
+          stats[s.id] = calcHP(base_stats[s.id], this_level, this_IV[s.id], @av[s.id], use_avs) 
+        else
+          stats[s.id] = calcHP(base_stats[s.id], this_level, this_IV[s.id], @ev[s.id], use_avs)
+        end
       else
-        stats[s.id] = calcStat(base_stats[s.id], this_level, this_IV[s.id], @ev[s.id], nature_mod[s.id])
+        if use_avs
+          stats[s.id] = calcStat(base_stats[s.id], this_level, this_IV[s.id], @av[s.id], nature_mod[s.id], this_happiness, use_avs)
+        else
+          stats[s.id] = calcStat(base_stats[s.id], this_level, this_IV[s.id], @ev[s.id], nature_mod[s.id], this_happiness, use_avs)
+        end
       end
     end
     hpDiff = @totalhp - @hp
@@ -1041,10 +1177,12 @@ class Pokemon
     ret.iv          = {}
     ret.ivMaxed     = {}
     ret.ev          = {}
+    ret.av          = {}
     GameData::Stat.each_main do |s|
       ret.iv[s.id]      = @iv[s.id]
       ret.ivMaxed[s.id] = @ivMaxed[s.id]
       ret.ev[s.id]      = @ev[s.id]
+      ret.av[s.id]      = @av[s.id]
     end
     ret.moves       = []
     @moves.each_with_index { |m, i| ret.moves[i] = m.clone }
@@ -1060,7 +1198,7 @@ class Pokemon
   # @param owner [Owner, Player, NPCTrainer] Pokémon owner (the player by default)
   # @param withMoves [TrueClass, FalseClass] whether the Pokémon should have moves
   # @param rechech_form [TrueClass, FalseClass] whether to auto-check the form
-  def initialize(species, level, owner = $Trainer, withMoves = true, recheck_form = true)
+  def initialize(species, level, owner = $Trainer, withMoves = true, recheck_form = true, using_avs = true)
     species_data = GameData::Species.get(species)
     @species          = species_data.species
     @form             = species_data.form
@@ -1095,9 +1233,14 @@ class Pokemon
     @iv               = {}
     @ivMaxed          = {}
     @ev               = {}
+    @avcaps           = {}
+    @useavs           = using_avs
+    @av               = {}
     GameData::Stat.each_main do |s|
       @iv[s.id]       = rand(IV_STAT_LIMIT + 1)
       @ev[s.id]       = 0
+      @av[s.id]       = 0
+      @avcaps[s.id]   = AV_LIMIT
     end
     if owner.is_a?(Owner)
       @owner = owner
@@ -1118,6 +1261,9 @@ class Pokemon
     @personalID       = rand(2 ** 16) | rand(2 ** 16) << 16
     @hp               = 1
     @totalhp          = 1
+    @damage_done      = 0
+    @critical_hits    = 0
+    @candies_fed      = 0
     calc_stats
     if @form == 0 && recheck_form
       f = MultipleForms.call("getFormOnCreation", self)

@@ -375,15 +375,6 @@ class PokemonSummary_Scene
     shadow = Color.new(104,104,104)
     dexNumBase   = (@pokemon.shiny?) ? Color.new(248,56,32) : Color.new(64,64,64)
     dexNumShadow = (@pokemon.shiny?) ? Color.new(224,152,144) : Color.new(176,176,176)
-    # If a Shadow Pokémon, draw the heart gauge area and bar
-    if @pokemon.shadowPokemon?
-      shadowfract = @pokemon.heart_gauge.to_f / Pokemon::HEART_GAUGE_SIZE
-      imagepos = [
-         ["Graphics/Pictures/Summary/overlay_shadow",224,240],
-         ["Graphics/Pictures/Summary/overlay_shadowbar",242,280,0,0,(shadowfract*248).floor,-1]
-      ]
-      pbDrawImagePositions(overlay,imagepos)
-    end
     # Write various bits of text
     textpos = [
        [_INTL("Dex No."),238,74,0,base,shadow],
@@ -433,24 +424,12 @@ class PokemonSummary_Scene
       textpos.push([@pokemon.owner.name,435,170,2,ownerbase,ownershadow])
       textpos.push([sprintf("%05d",@pokemon.owner.public_id),435,202,2,Color.new(64,64,64),Color.new(176,176,176)])
     end
-    # Write Exp text OR heart gauge message (if a Shadow Pokémon)
-    if @pokemon.shadowPokemon?
-      textpos.push([_INTL("Heart Gauge"),238,234,0,base,shadow])
-      heartmessage = [_INTL("The door to its heart is open! Undo the final lock!"),
-                      _INTL("The door to its heart is almost fully open."),
-                      _INTL("The door to its heart is nearly open."),
-                      _INTL("The door to its heart is opening wider."),
-                      _INTL("The door to its heart is opening up."),
-                      _INTL("The door to its heart is tightly shut.")][@pokemon.heartStage]
-      memo = sprintf("<c3=404040,B0B0B0>%s\n",heartmessage)
-      drawFormattedTextEx(overlay,234,304,264,memo)
-    else
-      endexp = @pokemon.growth_rate.minimum_exp_for_level(@pokemon.level + 1)
-      textpos.push([_INTL("Exp. Points"),238,234,0,base,shadow])
-      textpos.push([@pokemon.exp.to_s_formatted,488,266,1,Color.new(64,64,64),Color.new(176,176,176)])
-      textpos.push([_INTL("To Next Lv."),238,298,0,base,shadow])
-      textpos.push([(endexp-@pokemon.exp).to_s_formatted,488,330,1,Color.new(64,64,64),Color.new(176,176,176)])
-    end
+    # Write Exp text
+    endexp = @pokemon.growth_rate.minimum_exp_for_level(@pokemon.level + 1)
+    textpos.push([_INTL("Exp. Points"),238,234,0,base,shadow])
+    textpos.push([@pokemon.exp.to_s_formatted,488,266,1,Color.new(64,64,64),Color.new(176,176,176)])
+    textpos.push([_INTL("To Next Lv."),238,298,0,base,shadow])
+    textpos.push([(endexp-@pokemon.exp).to_s_formatted,488,330,1,Color.new(64,64,64),Color.new(176,176,176)])
     # Draw all text
     pbDrawTextPositions(overlay,textpos)
     # Draw Pokémon type(s)
@@ -539,11 +518,8 @@ class PokemonSummary_Scene
     overlay = @sprites["overlay"].bitmap
     memo = ""
     # Write nature
-    showNature = !@pokemon.shadowPokemon? || @pokemon.heartStage>3
-    if showNature
-      natureName = @pokemon.nature.name
-      memo += _INTL("<c3=F83820,E09890>{1}<c3=404040,B0B0B0> nature.\n",natureName)
-    end
+    natureName = @pokemon.nature.name
+    memo += _INTL("<c3=F83820,E09890>{1}<c3=404040,B0B0B0> nature.\n",natureName)
     # Write date received
     if @pokemon.timeReceived
       date  = @pokemon.timeReceived.day
@@ -580,52 +556,50 @@ class PokemonSummary_Scene
       memo += "\n"   # Empty line
     end
     # Write characteristic
-    if showNature
-      best_stat = nil
-      best_iv = 0
-      stats_order = [:HP, :ATTACK, :DEFENSE, :SPEED, :SPECIAL_ATTACK, :SPECIAL_DEFENSE]
-      start_point = @pokemon.personalID % stats_order.length   # Tiebreaker
-      for i in 0...stats_order.length
-        stat = stats_order[(i + start_point) % stats_order.length]
-        if !best_stat || @pokemon.iv[stat] > @pokemon.iv[best_stat]
-          best_stat = stat
-          best_iv = @pokemon.iv[best_stat]
-        end
+    best_stat = nil
+    best_iv = 0
+    stats_order = [:HP, :ATTACK, :DEFENSE, :SPEED, :SPECIAL_ATTACK, :SPECIAL_DEFENSE]
+    start_point = @pokemon.personalID % stats_order.length   # Tiebreaker
+    for i in 0...stats_order.length
+      stat = stats_order[(i + start_point) % stats_order.length]
+      if !best_stat || @pokemon.iv[stat] > @pokemon.iv[best_stat]
+        best_stat = stat
+        best_iv = @pokemon.iv[best_stat]
       end
-      characteristics = {
-        :HP              => [_INTL("Loves to eat."),
-                             _INTL("Takes plenty of siestas."),
-                             _INTL("Nods off a lot."),
-                             _INTL("Scatters things often."),
-                             _INTL("Likes to relax.")],
-        :ATTACK          => [_INTL("Proud of its power."),
-                             _INTL("Likes to thrash about."),
-                             _INTL("A little quick tempered."),
-                             _INTL("Likes to fight."),
-                             _INTL("Quick tempered.")],
-        :DEFENSE         => [_INTL("Sturdy body."),
-                             _INTL("Capable of taking hits."),
-                             _INTL("Highly persistent."),
-                             _INTL("Good endurance."),
-                             _INTL("Good perseverance.")],
-        :SPECIAL_ATTACK  => [_INTL("Highly curious."),
-                             _INTL("Mischievous."),
-                             _INTL("Thoroughly cunning."),
-                             _INTL("Often lost in thought."),
-                             _INTL("Very finicky.")],
-        :SPECIAL_DEFENSE => [_INTL("Strong willed."),
-                             _INTL("Somewhat vain."),
-                             _INTL("Strongly defiant."),
-                             _INTL("Hates to lose."),
-                             _INTL("Somewhat stubborn.")],
-        :SPEED           => [_INTL("Likes to run."),
-                             _INTL("Alert to sounds."),
-                             _INTL("Impetuous and silly."),
-                             _INTL("Somewhat of a clown."),
-                             _INTL("Quick to flee.")]
-      }
-      memo += sprintf("<c3=404040,B0B0B0>%s\n", characteristics[best_stat][best_iv % 5])
     end
+    characteristics = {
+      :HP              => [_INTL("Loves to eat."),
+                            _INTL("Takes plenty of siestas."),
+                            _INTL("Nods off a lot."),
+                            _INTL("Scatters things often."),
+                            _INTL("Likes to relax.")],
+      :ATTACK          => [_INTL("Proud of its power."),
+                            _INTL("Likes to thrash about."),
+                            _INTL("A little quick tempered."),
+                            _INTL("Likes to fight."),
+                            _INTL("Quick tempered.")],
+      :DEFENSE         => [_INTL("Sturdy body."),
+                            _INTL("Capable of taking hits."),
+                            _INTL("Highly persistent."),
+                            _INTL("Good endurance."),
+                            _INTL("Good perseverance.")],
+      :SPECIAL_ATTACK  => [_INTL("Highly curious."),
+                            _INTL("Mischievous."),
+                            _INTL("Thoroughly cunning."),
+                            _INTL("Often lost in thought."),
+                            _INTL("Very finicky.")],
+      :SPECIAL_DEFENSE => [_INTL("Strong willed."),
+                            _INTL("Somewhat vain."),
+                            _INTL("Strongly defiant."),
+                            _INTL("Hates to lose."),
+                            _INTL("Somewhat stubborn.")],
+      :SPEED           => [_INTL("Likes to run."),
+                            _INTL("Alert to sounds."),
+                            _INTL("Impetuous and silly."),
+                            _INTL("Somewhat of a clown."),
+                            _INTL("Quick to flee.")]
+    }
+    memo += sprintf("<c3=404040,B0B0B0>%s\n", characteristics[best_stat][best_iv % 5])
     # Write all text
     drawFormattedTextEx(overlay,232,82,268,memo)
   end
@@ -637,11 +611,9 @@ class PokemonSummary_Scene
     # Determine which stats are boosted and lowered by the Pokémon's nature
     statshadows = {}
     GameData::Stat.each_main { |s| statshadows[s.id] = shadow }
-    if !@pokemon.shadowPokemon? || @pokemon.heartStage > 3
-      @pokemon.nature_for_stats.stat_changes.each do |change|
-        statshadows[change[0]] = Color.new(136,96,72) if change[1] > 0
-        statshadows[change[0]] = Color.new(64,120,152) if change[1] < 0
-      end
+    @pokemon.nature_for_stats.stat_changes.each do |change|
+      statshadows[change[0]] = Color.new(136,96,72) if change[1] > 0
+      statshadows[change[0]] = Color.new(64,120,152) if change[1] < 0
     end
     # Write various bits of text
     textpos = [

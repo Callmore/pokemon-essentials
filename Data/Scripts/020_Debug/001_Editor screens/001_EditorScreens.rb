@@ -652,6 +652,9 @@ module TrainerPokemonProperty
       initsetting[:nature],
       initsetting[:iv],
       initsetting[:ev],
+      #initsetting[:av],
+      #initsetting[:avcaps],
+      #initsetting[:useavs],
       initsetting[:happiness],
       initsetting[:poke_ball]
     ])
@@ -663,6 +666,7 @@ module TrainerPokemonProperty
        [_INTL("Form"),          LimitProperty2.new(999),                 _INTL("Form of the Pokémon.")],
        [_INTL("Gender"),        GenderProperty,                          _INTL("Gender of the Pokémon.")],
        [_INTL("Shiny"),         BooleanProperty2,                        _INTL("If set to true, the Pokémon is a different-colored Pokémon.")],
+       [_INTL("SquareShiny"),   BooleanProperty2,                        _INTL("Whether the Pokémon is square shiny (special shiny animation).")],
        [_INTL("Shadow"),        BooleanProperty2,                        _INTL("If set to true, the Pokémon is a Shadow Pokémon.")]
     ]
     Pokemon::MAX_MOVES.times do |i|
@@ -670,14 +674,17 @@ module TrainerPokemonProperty
          MovePropertyForSpecies.new(oldsetting), _INTL("A move known by the Pokémon. Leave all moves blank (use Z key to delete) for a wild moveset.")])
     end
     pkmn_properties.concat([
-       [_INTL("Ability"),       AbilityProperty,                         _INTL("Ability of the Pokémon. Overrides the ability index.")],
-       [_INTL("Ability index"), LimitProperty2.new(99),                  _INTL("Ability index. 0=first ability, 1=second ability, 2+=hidden ability.")],
-       [_INTL("Held item"),     ItemProperty,                            _INTL("Item held by the Pokémon.")],
-       [_INTL("Nature"),        GameDataProperty.new(:Nature),           _INTL("Nature of the Pokémon.")],
-       [_INTL("IVs"),           IVsProperty.new(Pokemon::IV_STAT_LIMIT), _INTL("Individual values for each of the Pokémon's stats.")],
-       [_INTL("EVs"),           EVsProperty.new(Pokemon::EV_STAT_LIMIT), _INTL("Effort values for each of the Pokémon's stats.")],
-       [_INTL("Happiness"),     LimitProperty2.new(255),                 _INTL("Happiness of the Pokémon (0-255).")],
-       [_INTL("Poké Ball"),     BallProperty.new(oldsetting),            _INTL("The kind of Poké Ball the Pokémon is kept in.")]
+       [_INTL("Ability"),       AbilityProperty,                            _INTL("Ability of the Pokémon. Overrides the ability index.")],
+       [_INTL("Ability index"), LimitProperty2.new(99),                     _INTL("Ability index. 0=first ability, 1=second ability, 2+=hidden ability.")],
+       [_INTL("Held item"),     ItemProperty,                               _INTL("Item held by the Pokémon.")],
+       [_INTL("Nature"),        GameDataProperty.new(:Nature),              _INTL("Nature of the Pokémon.")],
+       [_INTL("IVs"),           IVsProperty.new(Pokemon::IV_STAT_LIMIT),    _INTL("Individual values for each of the Pokémon's stats.")],
+       [_INTL("EVs"),           EVsProperty.new(Pokemon::EV_STAT_LIMIT),    _INTL("Effort values for each of the Pokémon's stats.")],
+       [_INTL("Happiness"),     LimitProperty2.new(255),                    _INTL("Happiness of the Pokémon (0-255).")],
+       [_INTL("Poké Ball"),     BallProperty.new(oldsetting),               _INTL("The kind of Poké Ball the Pokémon is kept in.")]
+       #[_INTL("AVs"),           AVsProperty,                                _INTL("Awakening Values for each stat")],
+       #[_INTL("AV caps"),       AVsCapProperty.new(Pokemon::AV_LIMIT_MAX),  _INTL("Maximum Awakening Values for each stat")],
+       #[_INTL("Using Avs"),     BooleanProperty2,                           _INTL("If set to true, the Pokemon is using Awakening Values.")]
     ])
     pbPropertyList(settingname, oldsetting, pkmn_properties, false)
     return nil if !oldsetting[0]   # Species is nil
@@ -688,15 +695,16 @@ module TrainerPokemonProperty
       :form          => oldsetting[3],
       :gender        => oldsetting[4],
       :shininess     => oldsetting[5],
-      :shadowness    => oldsetting[6],
-      :ability       => oldsetting[7 + Pokemon::MAX_MOVES],
-      :ability_index => oldsetting[8 + Pokemon::MAX_MOVES],
-      :item          => oldsetting[9 + Pokemon::MAX_MOVES],
-      :nature        => oldsetting[10 + Pokemon::MAX_MOVES],
-      :iv            => oldsetting[11 + Pokemon::MAX_MOVES],
-      :ev            => oldsetting[12 + Pokemon::MAX_MOVES],
-      :happiness     => oldsetting[13 + Pokemon::MAX_MOVES],
-      :poke_ball     => oldsetting[14 + Pokemon::MAX_MOVES],
+      :square_shiny  => oldsetting[6],
+      :shadowness    => oldsetting[7],
+      :ability       => oldsetting[8 + Pokemon::MAX_MOVES],
+      :ability_index => oldsetting[9 + Pokemon::MAX_MOVES],
+      :item          => oldsetting[10 + Pokemon::MAX_MOVES],
+      :nature        => oldsetting[11 + Pokemon::MAX_MOVES],
+      :iv            => oldsetting[12 + Pokemon::MAX_MOVES],
+      :ev            => oldsetting[13 + Pokemon::MAX_MOVES],
+      :happiness     => oldsetting[14 + Pokemon::MAX_MOVES],
+      :poke_ball     => oldsetting[15 + Pokemon::MAX_MOVES],
     }
     moves = []
     Pokemon::MAX_MOVES.times do |i|

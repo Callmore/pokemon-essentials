@@ -438,7 +438,7 @@ class PokeballPlayerSendOutAnimation < PokeBattle_Animation
     ballMidY = battlerStartY-144
     # Set up Poké Ball sprite
     ball = addBallSprite(ballStartX,ballStartY,poke_ball)
-    ball.setZ(0,25)
+    ball.setZ(0,90)
     ball.setVisible(0,false)
     # Poké Ball tracking the player's hand animation (if trainer is visible)
     if @showingTrainer && traSprite && traSprite.x>0
@@ -659,9 +659,9 @@ class BattlerFaintAnimation < PokeBattle_Animation
     # Animation
     # Play cry
     delay = 10
-    cry = GameData::Species.cry_filename_from_pokemon(batSprite.pkmn)
+    cry = GameData::Species.cry_filename_from_pokemon(batSprite.pkmn, "FAINT")
     if cry
-      battler.setSE(0, cry, nil, 75)   # 75 is pitch
+      battler.setSE(0, cry, nil, 100)
       delay = GameData::Species.cry_length(batSprite.pkmn) * 20 / Graphics.frame_rate
     end
     # Sprite drops down

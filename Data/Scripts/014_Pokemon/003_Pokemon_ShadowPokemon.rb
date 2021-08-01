@@ -3,21 +3,10 @@
 #===============================================================================
 class Pokemon
   attr_accessor :shadow
-  attr_writer   :heart_gauge
   attr_writer   :hyper_mode
-  attr_accessor :saved_exp
   attr_accessor :saved_ev
   attr_accessor :shadow_moves
   HEART_GAUGE_SIZE = 3840
-
-  alias :__shadow_expeq :exp=
-  def exp=(value)
-    if shadowPokemon?
-      @saved_exp += value - @exp
-    else
-      __shadow_expeq(value)
-    end
-  end
 
   alias :__shadow_hpeq :hp=
   def hp=(value)
@@ -25,35 +14,18 @@ class Pokemon
     @hyper_mode = false if @hp <= 0
   end
 
-  def heart_gauge
-    return @heart_gauge || 0
-  end
-
-  def adjustHeart(value)
-    return if !shadowPokemon?
-    @heart_gauge = (self.heart_gauge + value).clamp(0, HEART_GAUGE_SIZE)
-  end
-
-  def heartStage
-    return 0 if !shadowPokemon?
-    stage_size = HEART_GAUGE_SIZE / 5.0
-    return ([self.heart_gauge, HEART_GAUGE_SIZE].min / stage_size).ceil
-  end
-
   def shadowPokemon?
-    return @shadow && @heart_gauge && @heart_gauge >= 0
+    return @shadow
   end
   alias isShadow? shadowPokemon?
 
   def hyper_mode
-    return (self.heart_gauge == 0 || @hp == 0) ? false : @hyper_mode
+    return (@hp == 0) ? false : @hyper_mode
   end
 
   def makeShadow
     @shadow       = true
-    @heart_gauge  = HEART_GAUGE_SIZE
     @hyper_mode   = false
-    @saved_exp    = 0
     @saved_ev     = {}
     GameData::Stat.each_main { |s| @saved_ev[s.id] = 0 }
     @shadow_moves = []
@@ -69,33 +41,24 @@ class Pokemon
       # No Shadow moveset defined; just use Shadow Rush
       @shadow_moves[0] = :SHADOWRUSH
     else
-      raise _INTL("Expected Shadow moves or Shadow Rush to be defined, but they weren't.")
+      # If moves are not defined then don't give them any and return.
+      @shadow_moves = nil
     end
     # Record this Pokémon's original moves
-    @moves.each_with_index { |m, i| @shadow_moves[MAX_MOVES + i] = m.id }
+    @moves.each_with_index { |m, i| @shadow_moves[MAX_MOVES + i] = m.id } if @shadow_moves
     # Update moves
     update_shadow_moves
   end
 
   def update_shadow_moves(relearn_all_moves = false)
     return if !@shadow_moves
-    # Not a Shadow Pokémon (any more); relearn all its original moves
-    if !shadowPokemon?
-      if @shadow_moves.length > MAX_MOVES
-        new_moves = []
-        @shadow_moves.each_with_index { |m, i| new_moves.push(m) if m && i >= MAX_MOVES }
-        replace_moves(new_moves)
-      end
-      @shadow_moves = nil
-      return
-    end
     # Is a Shadow Pokémon; ensure it knows the appropriate moves depending on its heart stage
     # Start with all Shadow moves
     new_moves = []
     @shadow_moves.each_with_index { |m, i| new_moves.push(m) if m && i < MAX_MOVES }
     num_shadow_moves = new_moves.length
     # Add some original moves (skipping ones in the same slot as a Shadow Move)
-    num_original_moves = (relearn_all_moves) ? 3 : [3, 3, 2, 1, 1, 0][self.heartStage]
+    num_original_moves = 3
     if num_original_moves > 0
       relearned_count = 0
       @shadow_moves.each_with_index do |m, i|
@@ -104,6 +67,7 @@ class Pokemon
         relearned_count += 1
         break if relearned_count >= num_original_moves
       end
+      @shadow_moves = nil
     end
     # Relearn Shadow moves plus some original moves (may not change anything)
     replace_moves(new_moves)
@@ -122,18 +86,6 @@ class Pokemon
         break
       end
     end
-  end
-
-  def purifiable?
-    return false if !shadowPokemon? || self.heart_gauge > 0
-    return false if isSpecies?(:LUGIA)
-    return true
-  end
-
-  def check_ready_to_purify
-    return if !shadowPokemon?
-    update_shadow_moves
-    pbMessage(_INTL("{1} can now be purified!", self.name)) if self.heart_gauge == 0
   end
 
   def add_evs(added_evs)
