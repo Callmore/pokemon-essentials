@@ -2310,6 +2310,8 @@ class PokeBattle_Move_0CF < PokeBattle_Move
     case @id
     when :BIND
       msg = _INTL("{1} was squeezed by {2}!",target.pbThis,user.pbThis(true))
+    when :ALLOUTGROWTH
+      msg = _INTL("{1} was squeezed by {2}!",target.pbThis,user.pbThis(true))
     when :CLAMP
       msg = _INTL("{1} clamped {2}!",user.pbThis,target.pbThis(true))
     when :FIRESPIN

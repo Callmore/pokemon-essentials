@@ -368,3 +368,47 @@ class PokeBattle_Move_1016 < PokeBattle_Move
         return false
     end
 end
+
+#===============================================================================
+# Damage is split across all targets (cap damage at 100 per target)
+# (All-Out Heat)
+#===============================================================================
+class PokeBattle_Move_1017 < PokeBattle_Move
+    numTargets = 0
+    def pbOnStartUse(user,targets)
+        numTargets = targets.length()
+    end
+
+    def pbBaseDamage(baseDmg,user,target)
+        return [baseDmg / numTargets, 100].min
+    end
+end
+
+#===============================================================================
+# Binds the target
+# (All-Out Growth)
+#===============================================================================
+class PokeBattle_Move_1018 < PokeBattle_Move
+    def pbAdditionalEffect(user,target)
+        user.pbUseMoveSimple(:BIND, target.index)
+    end
+end
+
+#===============================================================================
+# No additional effect (Hits adjacent targets)
+# (All-Out Tide)
+#===============================================================================
+class PokeBattle_Move_1019 < PokeBattle_Move
+end
+
+#===============================================================================
+# Flinches all opponents
+# (All-Out Shock)
+#===============================================================================
+class PokeBattle_Move_101A < PokeBattle_Move
+    def flinchingMove?; return true; end
+
+    def pbAdditionalEffect(user,target)
+        target.pbFlinch(user)
+    end
+end
