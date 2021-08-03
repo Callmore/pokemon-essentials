@@ -1460,20 +1460,18 @@ end
 # Minimized. (Flying Press)
 #===============================================================================
 class PokeBattle_Move_144 < PokeBattle_Move
+  def initialize(battle, move)
+    super
+    @type2 = :FLYING
+  end
+  
   def tramplesMinimize?(param=1)
     return true if param==1 && Settings::MECHANICS_GENERATION >= 6   # Perfect accuracy
     return true if param==2   # Double damage
     return super
   end
 
-  def pbCalcTypeModSingle(moveType,defType,user,target)
-    ret = super
-    if GameData::Type.exists?(:FLYING)
-      flyingEff = Effectiveness.calculate_one(:FLYING, defType)
-      ret *= flyingEff.to_f / Effectiveness::NORMAL_EFFECTIVE_ONE
-    end
-    return ret
-  end
+  #projectOriginality: extra functionality moved to type 2
 end
 
 

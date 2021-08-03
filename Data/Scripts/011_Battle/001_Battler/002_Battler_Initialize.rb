@@ -310,7 +310,8 @@ class PokeBattle_Battler
     #projectOriginality
     @effects[PBEffects::SmolderInstall]      = 0
     @effects[PBEffects::GraveDigger]         = 0
-    @effects[PBEffects::PlasmaCover]          = false
+    @effects[PBEffects::PlasmaCover]         = false
+    @effects[PBEffects::ScuffedPrep]         = 0
   end
 
   #=============================================================================

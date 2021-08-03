@@ -58,6 +58,13 @@ class PokeBattle_Move
       ret = Effectiveness::SUPER_EFFECTIVE_ONE if Effectiveness.normal_type?(moveType,target.type1,target.type2)
       ret = Effectiveness::NORMAL_EFFECTIVE_ONE if Effectiveness.not_very_effective_type?(moveType,target.type1,target.type2)
     end
+    #projectOriginality: we have a ton of moves that have a similar effect to officialmon Flying Press so we generalized the effect
+    if @type2 && @type2 != moveType   # don't allow the same type to stack on top of itself lmao
+      if GameData::Type.exists?(@type2)
+        type2Eff = Effectiveness.calculate_one(@type2, defType)
+        ret *= type2Eff.to_f / Effectiveness::NORMAL_EFFECTIVE_ONE
+      end
+    end
     return ret
   end
 

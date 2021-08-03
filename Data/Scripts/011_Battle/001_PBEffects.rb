@@ -128,6 +128,7 @@ begin
     SmolderInstall      = 200
     GraveDigger         = 201
     PlasmaCover         = 202
+    ScuffedPrep         = 203
 
     #===========================================================================
     # These effects apply to a battler position

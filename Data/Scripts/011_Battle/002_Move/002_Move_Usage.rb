@@ -355,6 +355,15 @@ class PokeBattle_Move
       target.effects[PBEffects::BideDamage] += damage
       target.effects[PBEffects::BideTarget] = user.index
     end
+    if target.effects[PBEffects::ScuffedPrep]>0
+      target.effects[PBEffects::ScuffedPrep] += 1
+    end
+    # cancel Grave Digger
+    if target.effects[PBEffects::GraveDigger] > 0
+      target.effects[PBEffects::GraveDigger] = 0
+      target.currentMove = nil
+      @battle.pbDisplay(_INTL("{1}'s Grave Digger ended!",target.pbThis))
+    end
     target.damageState.fainted = true if target.fainted?
     target.lastHPLost = damage             # For Focus Punch
     target.tookDamage = true if damage>0   # For Assurance

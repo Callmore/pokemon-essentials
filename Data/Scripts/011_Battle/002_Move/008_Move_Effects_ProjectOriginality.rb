@@ -167,6 +167,7 @@ end
 
 #===============================================================================
 # Power increases every turn, for 4 more turns. User is locked into this move for 5 turns.
+# Attack ends early when missing or taking damage.
 # (Grave Digger)
 #===============================================================================
 class PokeBattle_Move_100D < PokeBattle_Move
@@ -183,6 +184,14 @@ class PokeBattle_Move_100D < PokeBattle_Move
             user.currentMove = @id
         end
         user.effects[PBEffects::GraveDigger] -= 1 if user.effects[PBEffects::GraveDigger] > 0
+    end
+
+    def pbMissMessage(user,target)
+        @battle.pbDisplay(_INTL("{1} evaded the attack!",target.pbThis))
+        user.effects[PBEffects::GraveDigger] = 0
+        user.currentMove = nil
+        @battle.pbDisplay(_INTL("{1}'s {2} ended!",user.pbThis, @name))
+        return true
     end
 end
 
@@ -254,7 +263,9 @@ end
 # (One-Hundred Iron Clad Fists)
 #===============================================================================
 class PokeBattle_Move_1013 < PokeBattle_Move
-    pbCritialOverride(user,target); return 1; end
+    def pbCritialOverride(user,target)
+        return 1
+    end
 end
 
 #===============================================================================
@@ -411,4 +422,87 @@ class PokeBattle_Move_101A < PokeBattle_Move
     def pbAdditionalEffect(user,target)
         target.pbFlinch(user)
     end
+end
+
+#===============================================================================
+# No effect. (make a mega evolution or primal form type thing instead)
+# (Henshin)
+#===============================================================================
+
+#===============================================================================
+# Has a chance of confusing the target.
+# (Tail Tornado)
+#===============================================================================
+class PokeBattle_Move_101B < PokeBattle_Move
+    def pbMoveFailed?(user,targets)
+        failed = true
+        targets.each do |b|
+          next if !b.pbCanConfuse?(user,false,self)
+          failed = false
+          break
+        end
+        if failed
+          @battle.pbDisplay(_INTL("But it failed!"))
+          return true
+        end
+        return false
+    end
+
+    def pbEffectAgainstTarget(user,target)
+        target.pbConfuse if target.pbCanConfuse?(user,false,self)
+    end
+end
+
+#===============================================================================
+# Hits 2-5 times.
+# (Magic Chakram)
+#===============================================================================
+class PokeBattle_Move_101C < PokeBattle_Move_0C0
+end
+
+
+#===============================================================================
+# Raises Def and Sp.Def after two turns. Buff is increased if user is hit during the waiting turn.
+# (Scuffed Preperation)
+#===============================================================================
+class PokeBattle_Move_101D < PokeBattle_TwoTurnMove
+    def pbChargingTurnMessage(user,targets)
+        user.effects[PBEffects::ScuffedPrep] = 1
+        @battle.pbDisplay(_INTL("{1} started preparing!",user.pbThis))
+    end
+
+    def pbEffectGeneral(user)
+        return if !@damagingTurn
+        showAnim = true
+        [:DEFENSE,:SPECIAL_DEFENSE].each do |s|
+            next if !user.pbCanRaiseStatStage?(s,user,self)
+            if user.pbRaiseStatStage(s,user.effects[PBEffects::ScuffedPrep],user,showAnim)
+                showAnim = false
+            end
+        end
+        user.effects[PBEffects::ScuffedPrep] = 0
+    end
+end
+
+#===============================================================================
+# Harshly lowers target's Sp.Atk. User cannot move for one turn after using the move
+# Technical: Two turn move that applies effects on turn one.
+# (Soul Shatter Smash)
+#===============================================================================
+class PokeBattle_Move_101E < PokeBattle_TwoTurnMove
+    def pbDamagingMove?   # inverse of the original function
+        return false if @damagingTurn
+        return super
+    end
+
+    def pbChargingTurnEffect(user,target)
+        target.pbLowerStatStage(:SPECIAL_ATTACK,2,user,showAnim)
+    end
+end
+
+#===============================================================================
+# Increased crit chance.
+# (Aero Ass)
+#===============================================================================
+class PokeBattle_Move_101F < PokeBattle_Move
 end

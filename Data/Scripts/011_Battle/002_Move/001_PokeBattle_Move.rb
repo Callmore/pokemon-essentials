@@ -17,6 +17,8 @@ class PokeBattle_Move
   attr_accessor :calcType
   attr_accessor :powerBoost
   attr_accessor :snatched
+  #projectOriginality
+  attr_accessor :type2
 
   def to_int; return @id; end
 
@@ -42,6 +44,7 @@ class PokeBattle_Move
     @calcType   = nil
     @powerBoost = false   # For Aerilate, Pixilate, Refrigerate, Galvanize
     @snatched   = false
+    @type2      = nil     #projectOriginality dual typed move support a la Flying Press
   end
 
   # This is the code actually used to generate a PokeBattle_Move object. The
