@@ -25,6 +25,7 @@ class Pokemon
 
   def makeShadow
     @shadow       = true
+    @useavs       = false
     @hyper_mode   = false
     @saved_ev     = {}
     GameData::Stat.each_main { |s| @saved_ev[s.id] = 0 }
