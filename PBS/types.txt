@@ -61,7 +61,6 @@ Immunities = POISON
 [9]
 Name = ???
 InternalName = QMARKS
-IsPseudoType = true
 #-------------------------------
 [10]
 Name = Fire

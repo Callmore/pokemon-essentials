@@ -364,6 +364,12 @@ class PokeBattle_Move
       target.currentMove = nil
       @battle.pbDisplay(_INTL("{1}'s Grave Digger ended!",target.pbThis))
     end
+    # apply Plasma Cover
+    if target.effects[PBEffects::PlasmaCover] && self.pbContactMove?(user)
+    
+      @battle.pbDisplay(_INTL("{1} was affected by {2}'s Plasma Cover!",user.pbThis,target.pbThis))
+      user.pbParalyze(target) if user.pbCanParalyze?(target,false,self)
+    end
     target.damageState.fainted = true if target.fainted?
     target.lastHPLost = damage             # For Focus Punch
     target.tookDamage = true if damage>0   # For Assurance

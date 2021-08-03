@@ -18,17 +18,17 @@ end
 # (Smolder Install)
 #===============================================================================
 class PokeBattle_Move_1001 < PokeBattle_Move
-    def pbFailsAgainstTarget?(user, target)
-    if user.effects[PBEffects::SmolderInstall]
-        @battle.pbDisplay(_INTL("But it failed!"))
-        return true
+    def pbMoveFailed?(user, target)
+        if user.effects[PBEffects::SmolderInstall] > 0
+            @battle.pbDisplay(_INTL("But it failed!"))
+            return true
+        end
+        return false
     end
-    return false
-    end
-    #todo: damage calc changes
-    def pbEffectAgainstTarget(user, target)
+
+    def pbEffectGeneral(user)
         user.effects[PBEffects::SmolderInstall] = 6
-        @battle.pbDisplay(_INTL("{1}'s Fire-type moves are boosted!", user.pbThis))
+        @battle.pbDisplay(_INTL("{1}'s Fire-type moves are boosted for 6 turns!", user.pbThis))
     end
 end
 
@@ -65,7 +65,11 @@ end
 # Burns the target
 # (Frenetic Flambe)
 #===============================================================================
-class PokeBattle_Move_1005 < PokeBattle_BurnMove
+class PokeBattle_Move_1005 < PokeBattle_Move
+    def pbEffectWhenDealingDamage(user,target)
+        return if target.damageState.substitute
+        target.pbBurn(user) if target.pbCanBurn?(user,false,self)
+    end
 end
 
 #===============================================================================
@@ -99,7 +103,7 @@ class PokeBattle_Move_1008 < PokeBattle_Move
 
     def pbFailsAgainstTarget?(user, target)
         if target.stages[:SPECIAL_ATTACK] <= 0
-            @battle.pbDisplay(_INTL("But it failed!"))
+            @battle.pbDisplay(_INTL("But there were no Special Attack boosts to sap!"))
             return true
         elsif user.totalhp == user.hp
             @battle.pbDisplay(_INTL("{1}'s HP is already full!", user.pbThis))
@@ -108,7 +112,7 @@ class PokeBattle_Move_1008 < PokeBattle_Move
         return false
     end
 
-    def pbCalcDamage(user,target,numTargets=1)
+    def pbEffectAgainstTarget(user,target,numTargets=1)
         if target.stages[:SPECIAL_ATTACK] > 0
             pbShowAnimation(@id,user,target,1)   # Stat stage-draining animation
             @battle.pbDisplay(_INTL("{1} turned {2}'s Special Attack boosts into health!", user.pbThis, target.pbThis))
@@ -116,6 +120,7 @@ class PokeBattle_Move_1008 < PokeBattle_Move
             #I don't know if this will actually work
             hpGain = ((user.totalhp/2/6)*target.stages[:SPECIAL_ATTACK]).round
             target.stages[:SPECIAL_ATTACK] -= 1
+            user.pbRecoverHP(hpGain)
         end
         super
     end
@@ -148,7 +153,7 @@ end
 # (PSI Megalomania)
 #===============================================================================
 class PokeBattle_Move_100B < PokeBattle_ConfuseMove
-    def pbAdditionalEffect(user,target)
+    def pbEffectAgainstTarget(user,target)
         return if target.damageState.substitute
         target.pbBurn(user) if target.pbCanBurn?(user,false,self)
     end

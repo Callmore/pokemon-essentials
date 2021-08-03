@@ -758,3 +758,17 @@
 739,LIFEDEW,Life Dew,17E,0,WATER,Status,0,10,0,UserAndAllies,0,d,"The user scatters mysterious water around and restores the HP of itself."
 740,SURGINGSTRIKES,Surging Strikes,188,25,WATER,Physical,100,5,0,NearOther,0,abef,"Strikes the target thrice, with mastery of the Water style. Always results in a critical hit."
 741,FLIPTURN,Flip Turn,0EE,60,WATER,Physical,100,20,0,NearOther,0,abef,"After making its attack, the user rushes back to switch places with a party Pokémon in waiting."
+
+#projectOriginality----------------
+
+1000,ANATTACK,An Attack,1000,120,QMARKS,Physical,100,8,0,Foe,0,abef,"An example :^)"
+1001,SMOLDINSTALL,Smolder Install,1001,0,FIRE,Status,0,12,0,User,0,de,"Boosts the user's Fire-type moves for 6 turns."
+1002,LONGNAME,17th End,1002,270,QMARKS,Special,100,1,0,Foe,0,bef,"No additional effect."
+1003,JUSTICES,Justice Pose S,1003,0,NORMAL,Status,0,10,0,User,0,de,"User strikes a pose, sharply raising their Speed."
+1004,JUSTICEP,Justice Pose P,1004,0,NORMAL,Status,0,10,0,User,0,de,"User strikes a pose, sharply raising their Attack."
+1005,FFLAMBE,Frenetic Flambe,1005,190,FIRE,Physical,100,5,0,Foe,0,abefj,"User performs a flurry of kicks into an uppercut. Burns the target."
+1006,AEROBLADE,Aero Blade,1006,95,FLYING,Special,90,10,10,Foe,0,bef,"User sends out sharp wind projectiles that slice at the target. The target may flinch."
+1007,FRZBURN,Freeze Burn,1007,85,ICE,Special,100,10,20,Foe,0,bef,"User strikes with a blast of ice. May burn the target."
+1008,SOULDRAIN,Soul Drain,1008,0,FAIRY,Status,100,5,0,Foe,0,bce,"User saps the target's Special Attack boosts for health."
+1009,FIRESPRAY,Fire Spray,1009,85,FIRE,100,10,20,Foe,0,bef,"User sets the target ablaze with a fiery spell."
+1010,BULLETSPRAY,Bullet Spray,100A,90,STEEL,100,10,40,Foe,0,befn,"User opens fire upon the target."

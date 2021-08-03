@@ -651,8 +651,6 @@ class PokeBattle_Battle
       b.effects[PBEffects::Spotlight]        = 0
       b.effects[PBEffects::ThroatChop]       -= 1 if b.effects[PBEffects::ThroatChop]>0
       b.effects[PBEffects::Obstruct]         = false
-      #projectOriginality post turn
-      b.effects[PBEffects::SmolderInstall]   -= 1 if b.effects[PBEffects::SmolderInstall]>0
       b.lastHPLost                           = 0
       b.lastHPLostFromFoe                    = 0
       b.tookDamage                           = false
