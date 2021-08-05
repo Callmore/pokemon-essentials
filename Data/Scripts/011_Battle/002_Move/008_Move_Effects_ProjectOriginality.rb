@@ -525,3 +525,94 @@ end
 #===============================================================================
 class PokeBattle_Move_1021 < PokeBattle_Move
 end
+
+#===============================================================================
+# Burns the target.
+# (Scorcher)
+#===============================================================================
+class PokeBattle_Move_1022 < PokeBattle_Move
+    def pbEffectWhenDealingDamage(user,target)
+        return if target.damageState.substitute
+        target.pbBurn(user) if target.pbCanBurn?(user,false,self)
+    end
+end
+
+
+#===============================================================================
+# Removes the target's stat boosts
+# (Lamp's Curse)
+#===============================================================================
+class PokeBattle_Move_1023 < PokeBattle_Move
+    def pbCalcDamage(user,target,numTargets=1)
+        if target.hasRaisedStatStages?
+          pbShowAnimation(@id,user,target,1)   # Stat stage-draining animation
+          @battle.pbDisplay(_INTL("{1} removed the target's stat boosts!",user.pbThis))
+          showAnim = true
+          GameData::Stat.each_battle do |s|
+            target.statsLowered = true
+            target.stages[s.id] = 0
+          end
+        end
+        super
+    end
+end
+
+#===============================================================================
+# Lays spikes on the target's side if there aren't any already.
+# (Bushido-Earth)
+#===============================================================================
+class PokeBattle_Move_1024 < PokeBattle_Move
+    def pbEffectGeneral(user)
+        if user.pbOpposingSide.effects[PBEffects::Spikes] <= 0
+            user.pbOpposingSide.effects[PBEffects::Spikes] += 1
+            @battle.pbDisplay(_INTL("Spikes were scattered all around {1}'s feet!",
+            user.pbOpposingTeam(true)))
+        end
+    end
+end
+
+#===============================================================================
+# Sets up a Tailwind for 4 turns.
+# (Bushido-Wind)
+#===============================================================================
+class PokeBattle_Move_1025 < PokeBattle_Move
+    def pbEffectGeneral(user)
+        user.pbOwnSide.effects[PBEffects::Tailwind] = 4
+        @battle.pbDisplay(_INTL("The Tailwind blew from behind {1}!",user.pbTeam(true)))
+    end
+end
+
+#===============================================================================
+# Burns the target.
+# (Bushido-Fire)
+#===============================================================================
+class PokeBattle_Move_1026 < PokeBattle_Move
+    def pbEffectWhenDealingDamage(user,target)
+        return if target.damageState.substitute
+        target.pbBurn(user) if target.pbCanBurn?(user,false,self)
+    end
+end
+
+#===============================================================================
+# Always crits.
+# (Bushido-Soul)
+#===============================================================================
+class PokeBattle_Move_1027 < PokeBattle_Move
+    def pbCritialOverride(user,target)
+        return 1
+    end
+end
+
+#===============================================================================
+# TODO
+# (Squid Roll)
+#===============================================================================
+class PokeBattle_Move_1028 < PokeBattle_Move
+end
+
+#===============================================================================
+# Creates an Ink terrain.
+# (Splatfest)
+#===============================================================================
+class PokeBattle_Move_1029 < PokeBattle_Move
+end

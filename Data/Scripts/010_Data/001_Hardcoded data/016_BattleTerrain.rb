@@ -56,3 +56,10 @@ GameData::BattleTerrain.register({
   :name      => _INTL("Psychic"),
   :animation => "PsychicTerrain"
 })
+
+GameData::BattleTerrain.register({
+  :id        => :TurfWar,
+  :name      => _INTL("Inked"),
+  #TEMP
+  :animation => "MistyTerrain"
+})
