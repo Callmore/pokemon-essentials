@@ -616,3 +616,34 @@ end
 #===============================================================================
 class PokeBattle_Move_1029 < PokeBattle_Move
 end
+
+#===============================================================================
+# Recovers 8-10% max HP, 
+# restores 1-3 PP to all Ink type special attacks
+# fails if terrain isn't Inked
+# (Ink-overy)
+#===============================================================================
+class PokeBattle_Move_102A < PokeBattle_Move
+end
+
+#===============================================================================
+# missing creates the Inked terrain
+# (E-lite Charge)
+#===============================================================================
+class PokeBattle_Move_102B < PokeBattle_Move
+end
+
+#===============================================================================
+# Hits 4-8 times
+# each attack uses 1 extra PP
+# (Ink Shot)
+#===============================================================================
+class PokeBattle_Move_102C < PokeBattle_Move_0C0
+end
+
+#===============================================================================
+# Guaranteed to do critical hits against Normal Types.
+# (Revolt Screech)
+#===============================================================================
+class PokeBattle_Move_102D < PokeBattle_Move
+end
