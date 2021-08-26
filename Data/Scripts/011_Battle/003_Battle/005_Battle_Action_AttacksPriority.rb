@@ -151,6 +151,10 @@ class PokeBattle_Battle
           if @choices[b.index][0]==:UseMove
             move = @choices[b.index][2]
             pri = move.priority
+
+            #projectOriginality: Play Dumb's effects
+            pri = [pri-1, -6].min if b.effects[PBEffects::PlayDumb] == 1
+
             if b.abilityActive?
               pri = BattleHandlers.triggerPriorityChangeAbility(b.ability,b,move,pri)
             end

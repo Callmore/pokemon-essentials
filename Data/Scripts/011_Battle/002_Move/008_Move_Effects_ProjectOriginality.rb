@@ -302,8 +302,8 @@ class PokeBattle_Move_1014 < PokeBattle_Move
     def pbEffectAgainstTarget(user,target)
         if @npMove != :ELEMSURGE
             @battle.pbDisplay(_INTL("{1} turned into {2}!", @name, GameData::Move.get(@npMove).name))
+            user.pbUseMoveSimple(@npMove, target.index)
         end
-        user.pbUseMoveSimple(@npMove, target.index)
     end
 end
 
@@ -336,8 +336,8 @@ class PokeBattle_Move_1015 < PokeBattle_Move
     def pbEffectAgainstTarget(user,target)
         if @npMove != :ELEMSURGE
             @battle.pbDisplay(_INTL("{1} turned into {2}!", @name, GameData::Move.get(@npMove).name))
+            user.pbUseMoveSimple(@npMove, target.index)
         end
-        user.pbUseMoveSimple(@npMove, target.index)
     end
 end
 
@@ -372,8 +372,8 @@ class PokeBattle_Move_1016 < PokeBattle_Move
     def pbEffectAgainstTarget(user,target)
         if @npMove != :ELEMVEIL
             @battle.pbDisplay(_INTL("{1} turned into {2}!", @name, GameData::Move.get(@npMove).name))
+            user.pbUseMoveSimple(@npMove, target.index)
         end
-        user.pbUseMoveSimple(@npMove, target.index)
     end
 
     def pbMoveFailed?(user,targets)
@@ -405,7 +405,7 @@ end
 # (All-Out Growth)
 #===============================================================================
 class PokeBattle_Move_1018 < PokeBattle_Move
-    def pbAdditionalEffect(user,target)
+    def pbEffectAgainstTarget(user,target)
         user.pbUseMoveSimple(:BIND, target.index)
     end
 end
@@ -424,7 +424,7 @@ end
 class PokeBattle_Move_101A < PokeBattle_Move
     def flinchingMove?; return true; end
 
-    def pbAdditionalEffect(user,target)
+    def pbEffectAgainstTarget(user,target)
         target.pbFlinch(user)
     end
 end
@@ -438,7 +438,7 @@ end
 # Has a chance of confusing the target.
 # (Tail Tornado)
 #===============================================================================
-class PokeBattle_Move_101B < PokeBattle_Move
+class PokeBattle_Move_101B < PokeBattle_ConfuseMove
     def pbMoveFailed?(user,targets)
         failed = true
         targets.each do |b|
@@ -452,10 +452,6 @@ class PokeBattle_Move_101B < PokeBattle_Move
         end
         return false
     end
-
-    def pbEffectAgainstTarget(user,target)
-        target.pbConfuse if target.pbCanConfuse?(user,false,self)
-    end
 end
 
 #===============================================================================
@@ -464,7 +460,6 @@ end
 #===============================================================================
 class PokeBattle_Move_101C < PokeBattle_Move_0C0
 end
-
 
 #===============================================================================
 # Raises Def and Sp.Def after two turns. Buff is increased if user is hit during the waiting turn.
@@ -611,7 +606,7 @@ class PokeBattle_Move_1028 < PokeBattle_Move
 end
 
 #===============================================================================
-# Creates an Ink terrain.
+# Creates an Inked terrain.
 # (Splatfest)
 #===============================================================================
 class PokeBattle_Move_1029 < PokeBattle_Move
@@ -646,4 +641,18 @@ end
 # (Revolt Screech)
 #===============================================================================
 class PokeBattle_Move_102D < PokeBattle_Move
+end
+
+#===============================================================================
+# Lower target's priority bracket next turn, rarely inflicts confusion
+# (Play Dumb)
+#===============================================================================
+class PokeBattle_Move_102E < PokeBattle_ConfuseMove
+    def pbEffectAgainstTarget(user,target)
+        target.effects[PBEffects::PlayDumb] = 2
+    end
+    
+    def pbAdditionalEffect(user,target)
+        target.pbConfuse if target.pbCanConfuse?(user,false,self)
+    end
 end

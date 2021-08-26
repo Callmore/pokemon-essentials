@@ -129,6 +129,7 @@ begin
     GraveDigger         = 201
     PlasmaCover         = 202
     ScuffedPrep         = 203
+    PlayDumb            = 204
 
     #===========================================================================
     # These effects apply to a battler position
