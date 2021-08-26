@@ -894,7 +894,7 @@ BattleHandlers::DamageCalcUserAbility.add(:AERILATE,
   }
 )
 
-BattleHandlers::DamageCalcUserAbility.copy(:AERILATE,:PIXILATE,:REFRIGERATE,:GALVANIZE)
+BattleHandlers::DamageCalcUserAbility.copy(:AERILATE, :PIXILATE, :REFRIGERATE, :GALVANIZE, :NORMALIZE)
 
 BattleHandlers::DamageCalcUserAbility.add(:ANALYTIC,
   proc { |ability,user,target,move,mults,baseDmg,type|
@@ -1863,7 +1863,7 @@ BattleHandlers::UserAbilityEndOfMove.add(:MAGICIAN,
       user.item = b.item
       b.item = nil
       b.effects[PBEffects::Unburden] = true
-      if battle.wildBattle? && !user.initialItem && b.initialItem==user.item
+      if battle.wildBattle? && !user.initialItem && user.item == b.initialItem
         user.setInitialItem(user.item)
         b.setInitialItem(nil)
       end
@@ -1986,7 +1986,7 @@ BattleHandlers::TargetAbilityAfterMoveUse.add(:PICKPOCKET,
     target.item = user.item
     user.item = nil
     user.effects[PBEffects::Unburden] = true
-    if battle.wildBattle? && !target.initialItem && user.initialItem==target.item
+    if battle.wildBattle? && !target.initialItem && target.item == user.initialItem
       target.setInitialItem(target.item)
       user.setInitialItem(nil)
     end

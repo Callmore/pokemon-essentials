@@ -2512,7 +2512,8 @@ class PokeBattle_Move_0D6 < PokeBattle_HealingMove
     return (user.totalhp/2.0).round
   end
 
-  def pbEffectAfterAllHits(user,target)
+  def pbEffectGeneral(user)
+    super
     user.effects[PBEffects::Roost] = true
   end
 end
@@ -3271,8 +3272,8 @@ class PokeBattle_Move_0F1 < PokeBattle_Move
     itemName = target.itemName
     user.item = target.item
     # Permanently steal the item from wild Pokémon
-    if @battle.wildBattle? && target.opposes? &&
-       target.initialItem==target.item && !user.initialItem
+    if @battle.wildBattle? && target.opposes? && !user.initialItem &&
+       target.item == target.initialItem
       user.setInitialItem(target.item)
       target.pbRemoveItem
     else
@@ -3334,8 +3335,8 @@ class PokeBattle_Move_0F2 < PokeBattle_Move
     target.effects[PBEffects::ChoiceBand] = nil
     target.effects[PBEffects::Unburden]   = (!target.item && oldTargetItem)
     # Permanently steal the item from wild Pokémon
-    if @battle.wildBattle? && target.opposes? &&
-       target.initialItem==oldTargetItem && !user.initialItem
+    if @battle.wildBattle? && target.opposes? && !user.initialItem &&
+       oldTargetItem == target.initialItem
       user.setInitialItem(oldTargetItem)
     end
     @battle.pbDisplay(_INTL("{1} switched items with its opponent!",user.pbThis))
@@ -3378,8 +3379,8 @@ class PokeBattle_Move_0F3 < PokeBattle_Move
     itemName = user.itemName
     target.item = user.item
     # Permanently steal the item from wild Pokémon
-    if @battle.wildBattle? && user.opposes? &&
-       user.initialItem==user.item && !target.initialItem
+    if @battle.wildBattle? && user.opposes? && !target.initialItem &&
+       user.item == user.initialItem
       target.setInitialItem(user.item)
       user.pbRemoveItem
     else
