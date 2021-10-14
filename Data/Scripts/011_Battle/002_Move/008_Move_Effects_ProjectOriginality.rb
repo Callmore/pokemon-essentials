@@ -599,15 +599,22 @@ class PokeBattle_Move_1027 < PokeBattle_Move
 end
 
 #===============================================================================
-# TODO
+# Dual typed Ink and Fighting
+# If field is Inked, and user moves first(?), raise user Evasion
 # (Squid Roll)
+# TODO
 #===============================================================================
 class PokeBattle_Move_1028 < PokeBattle_Move
+    def initialize(battle, move)
+        super
+        @type2 = :FIGHTING
+    end
 end
 
 #===============================================================================
 # Creates an Inked terrain.
 # (Splatfest)
+# TODO
 #===============================================================================
 class PokeBattle_Move_1029 < PokeBattle_Move
 end
@@ -617,6 +624,7 @@ end
 # restores 1-3 PP to all Ink type special attacks
 # fails if terrain isn't Inked
 # (Ink-overy)
+# TODO
 #===============================================================================
 class PokeBattle_Move_102A < PokeBattle_Move
 end
@@ -624,6 +632,7 @@ end
 #===============================================================================
 # missing creates the Inked terrain
 # (E-lite Charge)
+# TODO
 #===============================================================================
 class PokeBattle_Move_102B < PokeBattle_Move
 end
@@ -632,6 +641,7 @@ end
 # Hits 4-8 times
 # each attack uses 1 extra PP
 # (Ink Shot)
+# TODO
 #===============================================================================
 class PokeBattle_Move_102C < PokeBattle_Move_0C0
 end
@@ -641,6 +651,10 @@ end
 # (Revolt Screech)
 #===============================================================================
 class PokeBattle_Move_102D < PokeBattle_Move
+    def pbCalcTypeModSingle(moveType,defType,user,target)
+        return Effectiveness::SUPER_EFFECTIVE_ONE if defType == :NORMAL
+        return super
+    end
 end
 
 #===============================================================================
@@ -654,5 +668,33 @@ class PokeBattle_Move_102E < PokeBattle_ConfuseMove
     
     def pbAdditionalEffect(user,target)
         target.pbConfuse if target.pbCanConfuse?(user,false,self)
+    end
+end
+
+#===============================================================================
+# Harsly lowers user's Special Atttack
+# May poison the target
+# The PBS definition of this move should have everyone as targets
+# (Reverbating Shock)
+#===============================================================================
+class PokeBattle_Move_102F < PokeBattle_PoisonMove
+end
+
+#===============================================================================
+# User swaps Evasion and Special Attack boosts
+# (Woomy Wares)
+#===============================================================================
+class PokeBattle_Move_1030 < PokeBattle_Move
+    def pbMoveFailed?(user)
+        if (user.stages[:EVASION] == 0 && user.stages[:SPECIAL_ATTACK] == 0)
+            @battle.pbDisplay(_INTL("But it failed!"))
+            return true 
+        end
+        return false
+    end
+
+    def pbEffectGeneral(user)
+        user.stages[:EVASION], user.stages[:SPECIAL_ATTACK] = user.stages[:SPECIAL_ATTACK], user.stages[:EVASION]
+        @battle.pbDisplay(_INTL("{1} swapped their Evasion and Special Attack boosts!",user.pbThis))
     end
 end

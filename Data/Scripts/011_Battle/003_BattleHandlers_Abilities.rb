@@ -820,6 +820,13 @@ BattleHandlers::AccuracyCalcUserAbility.add(:VICTORYSTAR,
   }
 )
 
+#projectOriginality - Last-Ditch Effort
+BattleHandlers::AccuracyCalcUserAbility.add(:LASTDITCH,
+  proc { |ability,mods,user,target,move,type|
+    mods[:base_accuracy] = 0 if user.hp < (user.totalhp / 4)
+  }
+)
+
 #===============================================================================
 # AccuracyCalcUserAllyAbility handlers
 #===============================================================================
